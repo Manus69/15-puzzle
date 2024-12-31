@@ -1,18 +1,10 @@
 #include "Prog.h"
 
-//gui update
-//gui move takes in dir
-//move is computed by npuzzle
-
-
 int main()
 {
     Prog prog;
 
-    if (! Prog_init(& prog))
-    {
-        printf("Init failed.\n");
-    }
+    if (! Prog_start(& prog)) return Prog_error(& prog, "Init failed");
 
     while (prog.runs)
     {
@@ -21,7 +13,7 @@ int main()
         Prog_update(& prog);
     }
 
-    Prog_deinit(& prog);
+    Prog_stop(& prog);
 
     return 0;
 }

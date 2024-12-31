@@ -11,10 +11,12 @@ typedef struct
     bool    runs;
 }   Prog;
 
-bool Prog_init(Prog * prog);
-void Prog_deinit(Prog * prog);
-void Prog_input(Prog * prog);
-void Prog_display(Prog const * prog);
-void Prog_update(Prog * prog);
+bool    Prog_start(Prog * prog);
+void    Prog_stop(Prog * prog);
+void    Prog_input(Prog * prog);
+void    Prog_update(Prog * prog);
+void    Prog_display(Prog * prog);
+int     Prog_error(Prog * prog, char const * msg);
+
 
 #endif

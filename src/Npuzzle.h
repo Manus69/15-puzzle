@@ -5,11 +5,11 @@
 
 typedef struct
 {
-    char    vals[GRID_SIZE * GRID_SIZE];
-    int     hole_idx;
+    char vals[NP_GRID_SIZE * NP_GRID_SIZE];
+    char hole_idx;
 }   Npuzzle;
 
-static inline const char * Npuzzle_cstr(Npuzzle const * np)
+static inline char const * Npuzzle_cstr(Npuzzle const * np)
 {
     return np->vals;
 }
@@ -24,10 +24,15 @@ static inline char Npuzzle_at_rc(Npuzzle const * np, int row, int col)
     return Npuzzle_at(np, row_col_idx(row, col));
 }
 
-static inline void Npuzzle_swap(Npuzzle * np, int k)
+static inline int Npuzzle_hole_idx(Npuzzle const * np)
 {
-    $swap(& np->vals[np->hole_idx], & np->vals[k], char);
-    np->hole_idx = k;
+    return np->hole_idx;
+}
+
+static inline void Npuzzle_swap_hole(Npuzzle * np, int idx)
+{
+    $swap(char, & np->vals[idx], & np->vals[Npuzzle_hole_idx(np)]);
+    np->hole_idx = idx;
 }
 
 static inline void Npuzzle_move(Npuzzle * np, int drow, int dcol)
@@ -35,28 +40,56 @@ static inline void Npuzzle_move(Npuzzle * np, int drow, int dcol)
     int idx;
 
     idx = row_col_idx(idx_row(np->hole_idx) + drow, idx_col(np->hole_idx) + dcol);
-    Npuzzle_swap(np, idx);
+    Npuzzle_swap_hole(np, idx);
 }
 
 static inline bool Npuzzle_move_check(Npuzzle * np, int drow, int dcol)
 {
-    int row, col;
+    int row, col, idx;
 
     row = idx_row(np->hole_idx) + drow;
     col = idx_col(np->hole_idx) + dcol;
 
-    if (row_valid(row) && col_valid(col))
+    if (row_col_valid(row) && row_col_valid(col))
     {
-        Npuzzle_move(np, drow, dcol);
+        idx = row_col_idx(row, col);
+        Npuzzle_swap_hole(np, idx);
+
         return true;
     }
 
     return false;
 }
 
-void Npuzzle_init(Npuzzle * np, char const * cstr);
-void Npuzzle_move_dir(Npuzzle * np, char dir);
-bool Npuzzle_move_dir_check(Npuzzle * np, char dir);
+static inline bool Npuzzle_move_dir_check(Npuzzle * np, char dir)
+{
+    int drow, dcol;
 
+    drow = dir_drow(dir);
+    dcol = dir_dcol(dir);
+
+    return Npuzzle_move_check(np, drow, dcol);
+}
+
+static inline void Npuzzle_init(Npuzzle * np, char const * cstr)
+{
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
+    {
+        np->vals[k] = cstr[k];
+        if (cstr[k] == '0') np->hole_idx = k;
+    }
+}
+
+static inline bool Npuzzle_solved(Npuzzle const * np)
+{
+    if (np->hole_idx != NP_GRID_SIZE * NP_GRID_SIZE - 1) return false;
+
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE - 1; k ++)
+    {
+        if (Npuzzle_at(np, k) != val_sym(k + 1)) return false;
+    }
+
+    return true;
+}
 
 #endif

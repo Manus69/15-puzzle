@@ -1,22 +1,14 @@
 #include "Npuzzle.h"
 
-#include <string.h>
-
-void Npuzzle_init(Npuzzle * np, char const * cstr)
+int Npuzzle_measure_disorder(Npuzzle const * np)
 {
-    for (int k = 0; k < GRID_SIZE * GRID_SIZE; k ++)
+    int val, idx;
+
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
-        np->vals[k] = cstr[k];
-        if (cstr[k] == '0') np->hole_idx = k;
+        val = sym_val(Npuzzle_at(np, k));
+        idx = sym_target_idx(Npuzzle_at(np, k));
+
+        
     }
-}
-
-void Npuzzle_move_dir(Npuzzle * np, char dir)
-{
-    return Npuzzle_move(np, dir_drow(dir), dir_dcol(dir));
-}
-
-bool Npuzzle_move_dir_check(Npuzzle * np, char dir)
-{
-    return Npuzzle_move_check(np, dir_drow(dir), dir_dcol(dir));
 }
