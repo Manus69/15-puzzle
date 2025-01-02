@@ -61,6 +61,11 @@ static inline bool Npuzzle_move_check(Npuzzle * np, int drow, int dcol)
     return false;
 }
 
+static inline void Npuzzle_move_dir(Npuzzle * np, char dir)
+{
+    return Npuzzle_move(np, dir_drow(dir), dir_dcol(dir));
+}
+
 static inline bool Npuzzle_move_dir_check(Npuzzle * np, char dir)
 {
     int drow, dcol;
@@ -91,5 +96,8 @@ static inline bool Npuzzle_solved(Npuzzle const * np)
 
     return true;
 }
+
+int     Npuzzle_measure_disorder(Npuzzle const * np);
+void    Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len);
 
 #endif

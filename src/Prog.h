@@ -8,6 +8,7 @@ typedef struct
 {
     Gui     gui;
     Npuzzle np;
+    Rbuff   action_buff;
     bool    runs;
 }   Prog;
 

@@ -1,7 +1,9 @@
 #include "Prog.h"
+#include "sln.h"
 
 #define CSTR_DFLT   "123456789abcdef0"
-#define NCYCLES     10
+#define NCYCLES     (10)
+#define BUFF_SIZE   (RBUFF_SIZE)
 
 bool Prog_start(Prog * prog)
 {
@@ -32,31 +34,65 @@ static void _try_dir(Prog * prog, char dir)
         Gui_grid_move(& prog->gui, to, NCYCLES);
     }
 
+    //
     if (Npuzzle_solved(& prog->np))
     {
         printf("solved\n");
+    }
+    //
+    printf("%d\n", Npuzzle_measure_disorder(& prog->np));
+}
+
+static bool _Prog_queue_action(Prog * prog, char x)
+{
+    if (Rbuff_full(& prog->action_buff)) return false;
+
+    Rbuff_pushc(& prog->action_buff, x);
+
+    return true;
+}
+
+static bool _Prog_perform_action(Prog * prog)
+{
+    if (Gui_grid_in_animation(& prog->gui)) return false;
+    if (Rbuff_empty(& prog->action_buff))   return false;
+
+    _try_dir(prog, Rbuff_pop(& prog->action_buff));
+
+    return true;
+}
+
+static void _scramble(Prog * prog, int nmoves)
+{
+    char buff[BUFF_SIZE] = {};
+
+    if (nmoves >= BUFF_SIZE) return ;
+    Npuzzle_scramble_seq(& prog->np, buff, nmoves);
+
+    //
+    printf("%s\n", buff);
+
+    for (int k = 0; k < nmoves; k ++)
+    {
+        _Prog_queue_action(prog, buff[k]);
     }
 }
 
 void Prog_input(Prog * prog)
 {
-    if (WindowShouldClose())
-    {
-        prog->runs = false;
-        return ;
-    }
-
+    if (WindowShouldClose()) { prog->runs = false; return ; }
     if (Gui_grid_in_animation(& prog->gui)) return ;
 
-    if (IsKeyPressed(KEY_UP))       return _try_dir(prog, 'd');
-    if (IsKeyPressed(KEY_RIGHT))    return _try_dir(prog, 'l');
-    if (IsKeyPressed(KEY_DOWN))     return _try_dir(prog, 'u');
-    if (IsKeyPressed(KEY_LEFT))     return _try_dir(prog, 'r');
-
+    if      (IsKeyPressed(KEY_UP))       _Prog_queue_action(prog, 'd');
+    else if (IsKeyPressed(KEY_RIGHT))    _Prog_queue_action(prog, 'l');
+    else if (IsKeyPressed(KEY_DOWN))     _Prog_queue_action(prog, 'u');
+    else if (IsKeyPressed(KEY_LEFT))     _Prog_queue_action(prog, 'r');
+    else if (IsKeyPressed(KEY_SPACE))    _scramble(prog, BUFF_SIZE - 1);
 }
 
 void Prog_update(Prog * prog)
 {
+    _Prog_perform_action(prog);
     Gui_update(& prog->gui);
 }
 

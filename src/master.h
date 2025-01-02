@@ -4,17 +4,13 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "lib.h"
 
 #define NO_IDX         (-1)
 #define NP_GRID_SIZE   (4)
 #define NP_SYM_CSTR    "0123456789abcdef"
-
-#define $swap(T, x, y) \
-{\
-    T _t = * (T *) (x);\
-    * (T *) (x) = * (T *) (y);\
-    * (T *) (y) = _t;\
-}
+#define NP_DIRS        "urdl"
+#define NP_NDIRS       (4)
 
 static inline int row_col_idx(int row, int col)
 {
@@ -67,6 +63,11 @@ static inline int dir_drow(char dir)
     return drow[(int) dir];
 }
 
+static inline char drow_dir(int drow)
+{
+    return (drow == -1) * 'u' + (drow == 1) * 'd';
+}
+
 static inline int dir_dcol(char dir)
 {
     static char dcol[] =
@@ -78,5 +79,25 @@ static inline int dir_dcol(char dir)
 
     return dcol[(int) dir];
 }
+
+static inline char dcol_dir(int dcol)
+{
+    return (dcol == -1) * 'l' + (dcol == 1) * 'r';
+}
+
+static inline char dir_rev(char dir)
+{
+    static char rev[] =
+    {
+        ['u'] = 'd',
+        ['r'] = 'l',
+        ['d'] = 'u',
+        ['l'] = 'r',
+    };
+
+    return rev[(int) dir];
+}
+
+
 
 #endif
