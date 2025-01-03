@@ -3,12 +3,15 @@
 
 #include "Gui.h"
 #include "Npuzzle.h"
+#include "Solver.h"
 
 typedef struct
 {
     Gui     gui;
     Npuzzle np;
     Rbuff   action_buff;
+    Solver  solver;
+    int     speed;
     bool    runs;
 }   Prog;
 

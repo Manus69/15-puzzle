@@ -85,6 +85,17 @@ static inline char dcol_dir(int dcol)
     return (dcol == -1) * 'l' + (dcol == 1) * 'r';
 }
 
+static inline char dir_idx_idx(int from, int to)
+{
+    int drow;
+    int dcol;
+
+    drow = idx_row(to) - idx_row(from);
+    dcol = idx_col(to) - idx_col(from);
+
+    return drow_dir(drow) + dcol_dir(dcol); 
+}
+
 static inline char dir_rev(char dir)
 {
     static char rev[] =

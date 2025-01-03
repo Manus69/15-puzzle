@@ -99,5 +99,6 @@ static inline bool Npuzzle_solved(Npuzzle const * np)
 
 int     Npuzzle_measure_disorder(Npuzzle const * np);
 void    Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len);
+int     Npuzzle_solve(Npuzzle const * np, char * buff, int len);
 
 #endif
