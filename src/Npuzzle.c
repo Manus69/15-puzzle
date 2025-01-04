@@ -8,7 +8,7 @@ int Npuzzle_measure_disorder(Npuzzle const * np)
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
         idx = sym_target_idx(Npuzzle_at(np, k));
-        count += idx < k;
+        count += idx != k;
     }
 
     return count;
@@ -105,6 +105,7 @@ static int _solve(Pos const * pos, char * buff, int len)
         {
             if (Npuzzle_hole_idx(& next[k].np) == pos->parent_idx) next[k].disorder = __INT_MAX__ - 1;
             else next[k].disorder = Npuzzle_measure_disorder(& next[k].np);
+            // next[k].disorder = Npuzzle_measure_disorder(& next[k].np);
         }
         else
         {

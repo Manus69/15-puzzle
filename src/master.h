@@ -12,6 +12,7 @@
 #define NP_DIRS        "urdl"
 #define NP_NDIRS       (4)
 
+
 static inline int row_col_idx(int row, int col)
 {
     return row * NP_GRID_SIZE + col;

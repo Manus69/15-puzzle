@@ -97,6 +97,16 @@ static inline bool Npuzzle_solved(Npuzzle const * np)
     return true;
 }
 
+static inline unsigned long Npuzzle_hash(Npuzzle const * np)
+{
+    return hash(np->vals, NP_GRID_SIZE * NP_GRID_SIZE);
+}
+
+static inline unsigned long Npuzzle_hashf(void const * ptr)
+{
+    return Npuzzle_hash(ptr);
+}
+
 int     Npuzzle_measure_disorder(Npuzzle const * np);
 void    Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len);
 int     Npuzzle_solve(Npuzzle const * np, char * buff, int len);

@@ -10,6 +10,9 @@
     * (T *) (y) = _t;\
 }
 
+typedef int (* cmpf)(void const *, void const *);
+typedef unsigned long (* hashf)(void const *);
+
 static inline unsigned rng_xor(unsigned * seed)
 {
     unsigned x;
@@ -20,6 +23,18 @@ static inline unsigned rng_xor(unsigned * seed)
     x ^= x << 5;
 
     return * seed = x;
+}
+
+static inline unsigned long hash(unsigned char * bytes, int len)
+{
+    unsigned long hash = 5381;
+
+    for (int k = 0; k < len; k ++)
+    {
+        hash = hash * 33 + bytes;
+    }
+
+    return hash;
 }
 
 typedef struct
