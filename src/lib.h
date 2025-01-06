@@ -1,6 +1,8 @@
 #ifndef LIB_H
 #define LIB_H
 
+#include <stdbool.h>
+
 #define RBUFF_SIZE (1 << 5)
 
 #define $swap(T, x, y) \
@@ -25,13 +27,13 @@ static inline unsigned rng_xor(unsigned * seed)
     return * seed = x;
 }
 
-static inline unsigned long hash(unsigned char * bytes, int len)
+static inline unsigned long hash(unsigned char const * bytes, int len)
 {
     unsigned long hash = 5381;
 
     for (int k = 0; k < len; k ++)
     {
-        hash = hash * 33 + bytes;
+        hash = hash * 33 + bytes[k];
     }
 
     return hash;
@@ -107,5 +109,13 @@ static inline void Rbuff_pushc_forced(Rbuff * rbuff, char x)
 
     Rbuff_pushc(rbuff, x);
 }
+
+typedef struct Htbl Htbl;
+
+Htbl *  Htbl_new(int isize);
+void    Htbl_del(Htbl * htbl);
+void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, cmpf cmp);
+int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, cmpf cmp);
+
 
 #endif

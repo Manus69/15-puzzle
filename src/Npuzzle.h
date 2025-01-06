@@ -99,7 +99,7 @@ static inline bool Npuzzle_solved(Npuzzle const * np)
 
 static inline unsigned long Npuzzle_hash(Npuzzle const * np)
 {
-    return hash(np->vals, NP_GRID_SIZE * NP_GRID_SIZE);
+    return hash((unsigned char const *) np->vals, NP_GRID_SIZE * NP_GRID_SIZE);
 }
 
 static inline unsigned long Npuzzle_hashf(void const * ptr)
