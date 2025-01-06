@@ -34,12 +34,12 @@ static int _idxhash(Htbl const * htbl, void const * item, hashf hf)
     return hf(item) % (unsigned long) htbl->len;
 }
 
-static int _idxof(Htbl const * htbl, void const * item, int start_idx, cmpf cmp)
+static int _idxof(Htbl const * htbl, void const * item, int start_idx, eqf eq)
 {
     while (true)
     {
-        if (cmp(item, _get(htbl, start_idx)) == 0) return start_idx;
-        if (! _is_empty(htbl, start_idx)) return -1;
+        if (eq(item, _get(htbl, start_idx)))    return start_idx;
+        if (! _is_empty(htbl, start_idx))       return -1;
 
         start_idx = (start_idx + 1) % htbl->len;
     }
@@ -131,21 +131,21 @@ void Htbl_del(Htbl * htbl)
     free(htbl->mem);
 }
 
-void * Htbl_get(Htbl const * htbl, void const * item, hashf hf, cmpf cmp)
+void * Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq)
 {
     int idx;
 
     if (htbl->count == 0) return NULL;
 
     idx = _idxhash(htbl, item, hf);
-    idx = _idxof(htbl, item, idx, cmp);
+    idx = _idxof(htbl, item, idx, eq);
 
     return idx < 0 ? 0 : _get(htbl, idx);
 }
 
-int Htbl_insert(Htbl * htbl, void const * item, hashf hf, cmpf cmp)
+int Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq)
 {
-    if (Htbl_get(htbl, item, hf, cmp)) return 0;
+    if (Htbl_get(htbl, item, hf, eq)) return 0;
     if (_load(htbl) > HTBL_LOADF)
     {
         if (! _rehash(htbl, hf)) return -1;

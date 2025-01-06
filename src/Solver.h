@@ -7,18 +7,13 @@
 
 typedef struct
 {
-    char buff[SOLVER_BS]; 
+    char    buff[SOLVER_BS];
+    Htbl *  htbl;
 }   Solver;
 
-static inline int Solver_solve(Solver * solver, Npuzzle const * np)
-{
-    int sln_len;
+int     Solver_solve(Solver * solver, Npuzzle const * np);
+bool    Solver_init(Solver * solver);
+void    Solver_deinit(Solver * solver);
 
-    * solver = (Solver) {};
-
-    sln_len = Npuzzle_solve(np, solver->buff, SOLVER_BS - 1);
-
-    return sln_len;
-}
 
 #endif

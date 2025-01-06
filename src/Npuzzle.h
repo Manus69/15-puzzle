@@ -107,8 +107,22 @@ static inline unsigned long Npuzzle_hashf(void const * ptr)
     return Npuzzle_hash(ptr);
 }
 
+static inline bool Npuzzle_eq(Npuzzle const * lhs, Npuzzle const * rhs)
+{
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
+    {
+        if (Npuzzle_at(lhs, k) != Npuzzle_at(rhs, k)) return false;
+    }
+
+    return true;
+}
+
+static inline bool Npuzzle_eqf(void const * lhs, void const * rhs)
+{
+    return Npuzzle_eq(lhs, rhs);
+}
+
 int     Npuzzle_measure_disorder(Npuzzle const * np);
 void    Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len);
-int     Npuzzle_solve(Npuzzle const * np, char * buff, int len);
 
 #endif

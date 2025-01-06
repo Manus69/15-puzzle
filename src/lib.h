@@ -13,6 +13,7 @@
 }
 
 typedef int (* cmpf)(void const *, void const *);
+typedef bool (* eqf)(void const *, void const *);
 typedef unsigned long (* hashf)(void const *);
 
 static inline unsigned rng_xor(unsigned * seed)
@@ -114,8 +115,8 @@ typedef struct Htbl Htbl;
 
 Htbl *  Htbl_new(int isize);
 void    Htbl_del(Htbl * htbl);
-void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, cmpf cmp);
-int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, cmpf cmp);
+void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq);
+int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq);
 
 
 #endif

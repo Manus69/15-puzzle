@@ -9,7 +9,8 @@ bool Prog_start(Prog * prog)
 {
     * prog = (Prog) {};
 
-    if (! Gui_init(& prog->gui)) return false;
+    if (! Gui_init(& prog->gui))        return false;
+    if (! Solver_init(& prog->solver))  return false;
 
     Npuzzle_init(& prog->np, CSTR_DFLT);
     Gui_grid_set(& prog->gui, Npuzzle_cstr(& prog->np));
@@ -21,6 +22,7 @@ bool Prog_start(Prog * prog)
 void Prog_stop(Prog * prog)
 {
     Gui_deinit(& prog->gui);
+    Solver_deinit(& prog->solver);
 }
 
 static void _try_dir(Prog * prog, char dir)
