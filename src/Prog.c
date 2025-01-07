@@ -1,5 +1,6 @@
 #include "Prog.h"
 #include "sln.h"
+#include "dbg.h"
 
 #define CSTR_DFLT   "123456789abcdef0"
 #define NCYCLES     (10)
@@ -37,12 +38,12 @@ static void _try_dir(Prog * prog, char dir)
     }
 
     //
-    if (Npuzzle_solved(& prog->np))
-    {
-        printf("solved\n");
-    }
+    // if (Npuzzle_solved(& prog->np))
+    // {
+    //     printf("solved\n");
+    // }
     //
-    printf("%d\n", Npuzzle_measure_disorder(& prog->np));
+    // printf("%d\n", Npuzzle_measure_disorder(& prog->np));
 }
 
 static bool _Prog_queue_action(Prog * prog, char x, int speed)
@@ -62,6 +63,7 @@ static bool _Prog_perform_action(Prog * prog)
 
     _try_dir(prog, Rbuff_pop(& prog->action_buff));
 
+
     return true;
 }
 
@@ -73,7 +75,7 @@ static void _scramble(Prog * prog, int nmoves)
     Npuzzle_scramble_seq(& prog->np, buff, nmoves);
 
     //
-    printf("%s\n", buff);
+    // printf("%s\n", buff);
 
     for (int k = 0; k < nmoves; k ++)
     {
@@ -97,10 +99,26 @@ static void _solve(Prog * prog)
     }
 }
 
+static void _test(Prog * prog)
+{
+//
+    if (Solver_test_not_visited(& prog->solver, & prog->np))
+    {
+        dbg_Npuzzle(& prog->np);
+        dbg_Solver(& prog->solver);
+        // Solver_test(& prog->solver);
+    }
+}
+
 void Prog_input(Prog * prog)
 {
     if (WindowShouldClose()) { prog->runs = false; return ; }
     if (Gui_grid_in_animation(& prog->gui)) return ;
+
+    if (GetKeyPressed())
+    {
+        // _test(prog);
+    }
 
     if      (IsKeyPressed(KEY_UP))      _Prog_queue_action(prog, 'd', NCYCLES);
     else if (IsKeyPressed(KEY_RIGHT))   _Prog_queue_action(prog, 'l', NCYCLES);

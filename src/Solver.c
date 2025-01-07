@@ -85,6 +85,8 @@ int Solver_solve(Solver * solver, Npuzzle const * np)
         .disorder = Npuzzle_measure_disorder(np),
     };
 
+    Htbl_insert(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf);
+
     return _solve(solver, & pos, 0);
 }
 
@@ -96,6 +98,35 @@ bool Solver_init(Solver * solver)
 void Solver_deinit(Solver * solver)
 {
     Htbl_del(solver->htbl);
+}
+
+int Solver_npos(Solver const * solver)
+{
+    return Htbl_count(solver->htbl);
+}
+
+//123456709ab8defc
+
+void Solver_test(Solver * solver)
+{
+    Npuzzle np;
+
+    Npuzzle_init(& np, "123456709ab8defc");
+    Htbl_insert(solver->htbl, & np, Npuzzle_hashf, Npuzzle_eqf);
+    Htbl_insert(solver->htbl, & np, Npuzzle_hashf, Npuzzle_eqf);
+
+
+}
+
+bool Solver_test_not_visited(Solver * solver, Npuzzle const * np)
+{
+    // void * ptr;
+
+    // ptr = Htbl_get(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf);
+
+    // return ptr;
+
+    return Htbl_insert(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf) > 0;
 }
 
 

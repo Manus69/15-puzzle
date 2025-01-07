@@ -14,6 +14,9 @@ typedef struct
 int     Solver_solve(Solver * solver, Npuzzle const * np);
 bool    Solver_init(Solver * solver);
 void    Solver_deinit(Solver * solver);
-
+//
+int     Solver_npos(Solver const * solver);
+bool    Solver_test_not_visited(Solver * solver, Npuzzle const * np);
+void    Solver_test(Solver * solver);
 
 #endif

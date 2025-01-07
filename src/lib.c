@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define HTBL_LOADF  (75.0)
+#define HTBL_LOADF  (0.75)
 #define HTBL_DC     (1 << 10)
 
 struct Htbl
@@ -38,8 +38,8 @@ static int _idxof(Htbl const * htbl, void const * item, int start_idx, eqf eq)
 {
     while (true)
     {
+        if (_is_empty(htbl, start_idx))         return -1;
         if (eq(item, _get(htbl, start_idx)))    return start_idx;
-        if (! _is_empty(htbl, start_idx))       return -1;
 
         start_idx = (start_idx + 1) % htbl->len;
     }
@@ -108,6 +108,11 @@ static bool _rehash(Htbl * htbl, hashf hf)
     return true;
 }
 
+int Htbl_count(Htbl const * htbl)
+{
+    return htbl->count;
+}
+
 Htbl * Htbl_new(int isize)
 {
     Htbl * htbl;
@@ -131,6 +136,7 @@ void Htbl_del(Htbl * htbl)
     free(htbl->mem);
 }
 
+// #include "dbg.h"
 void * Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq)
 {
     int idx;
@@ -138,7 +144,14 @@ void * Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq)
     if (htbl->count == 0) return NULL;
 
     idx = _idxhash(htbl, item, hf);
+    //
+    // Npuzzle * lhs, * rhs;
+
+    // lhs = _get(htbl, idx);
+    // rhs = (Npuzzle *) item;
+    //
     idx = _idxof(htbl, item, idx, eq);
+
 
     return idx < 0 ? 0 : _get(htbl, idx);
 }
@@ -155,3 +168,26 @@ int Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq)
 
     return 1;
 }
+
+void Htbl_purge(Htbl * htbl)
+{
+    htbl->count = 0;
+}
+
+// static bool _eq_int(void const * lhs, void const * rhs)
+// {
+//     return * (int *) lhs == * (int *) rhs;
+// }
+
+// static unsigned long _hash_int(void const * x)
+// {
+//     return * (unsigned long *) x;
+// }
+
+// void Htbl_test(void)
+// {
+//     Htbl * htbl;
+
+//     htbl = Htbl_new(sizeof(int));
+
+// }

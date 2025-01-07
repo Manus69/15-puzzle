@@ -113,10 +113,12 @@ static inline void Rbuff_pushc_forced(Rbuff * rbuff, char x)
 
 typedef struct Htbl Htbl;
 
+int     Htbl_count(Htbl const * htbl);
 Htbl *  Htbl_new(int isize);
 void    Htbl_del(Htbl * htbl);
 void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq);
 int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq);
+void    Htbl_purge(Htbl * htbl);
 
 
 #endif
