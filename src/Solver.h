@@ -3,7 +3,7 @@
 
 #include "Npuzzle.h"
 
-#define SOLVER_BS (1 << 6)
+#define SOLVER_BS (1 << 8)
 
 typedef struct
 {

@@ -43,7 +43,9 @@ static void _try_dir(Prog * prog, char dir)
     //     printf("solved\n");
     // }
     //
-    // printf("%d\n", Npuzzle_measure_disorder(& prog->np));
+    printf("disorder :  %d\n", Npuzzle_measure_disorder(& prog->np));
+    printf("invs :      %d\n", Npuzzle_count_invs(& prog->np));
+    printf("distance : %d\n\n", Npuzzle_measure_distance(& prog->np));
 }
 
 static bool _Prog_queue_action(Prog * prog, char x, int speed)

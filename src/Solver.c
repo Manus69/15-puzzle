@@ -24,14 +24,15 @@ static int _Pos_cmpf(void const * _lhs, void const * _rhs)
     return lhs->disorder < rhs->disorder ? -1 : lhs->disorder > rhs->disorder;
 }
 
-static Pos _pos_from_np(Npuzzle const * np, char dir)
+static Pos _pos_from_np(Npuzzle const * np, char dir, int (* _metric)(Npuzzle const *))
 {
     Pos pos;
 
     pos.np = * np;
     if (Npuzzle_move_dir_check(& pos.np, dir))
     {
-        pos.disorder = Npuzzle_measure_disorder(& pos.np);
+        // pos.disorder = Npuzzle_measure_disorder(& pos.np);
+        pos.disorder = _metric(& pos.np);
     }
     else
     {
@@ -41,20 +42,20 @@ static Pos _pos_from_np(Npuzzle const * np, char dir)
     return pos;
 }
 
-static int _solve(Solver * solver, Pos const * pos, int idx)
+static int _solve(Solver * solver, Pos const * pos, int idx, int (*_metric)(Npuzzle const *))
 {
     Pos next[NP_NDIRS];
     int pos_count;
     int sln;
 
-    if (Npuzzle_solved(& pos->np)) return 0;
-    // if (Htbl_get(solver->htbl, & pos->np, Npuzzle_hashf, Npuzzle_eqf)) return -1;
+    if (Npuzzle_solved(& pos->np))  return 0;
+    if (idx >= SOLVER_BS)           return -1;
     if (Htbl_insert(solver->htbl, & pos->np, Npuzzle_hashf, Npuzzle_eqf) <= 0) return -1;
 
     pos_count = NP_NDIRS;
     for (int k = 0; k < NP_NDIRS; k ++)
     {
-        next[k] = _pos_from_np(& pos->np, NP_DIRS[k]);
+        next[k] = _pos_from_np(& pos->np, NP_DIRS[k], _metric);
         if (_Pos_impossible(next + k)) pos_count --;
     }
 
@@ -62,7 +63,7 @@ static int _solve(Solver * solver, Pos const * pos, int idx)
 
     for (int k = 0; k < pos_count; k ++)
     {
-        sln = _solve(solver, next + k, idx + 1);
+        sln = _solve(solver, next + k, idx + 1, _metric);
         if (sln >= 0)
         {
             solver->buff[idx] = dir_idx_idx(Npuzzle_hole_idx(& pos->np), Npuzzle_hole_idx(& next[k].np));
@@ -76,18 +77,18 @@ static int _solve(Solver * solver, Pos const * pos, int idx)
 int Solver_solve(Solver * solver, Npuzzle const * np)
 {
     Pos pos;
+    int (* mertic)(Npuzzle const *) = Npuzzle_measure_distance;
 
     memset(solver->buff, 0, SOLVER_BS);
+    Htbl_purge(solver->htbl);
 
     pos = (Pos)
     {
         .np = * np,
-        .disorder = Npuzzle_measure_disorder(np),
+        .disorder = mertic(np),
     };
 
-    Htbl_insert(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf);
-
-    return _solve(solver, & pos, 0);
+    return _solve(solver, & pos, 0, mertic);
 }
 
 bool Solver_init(Solver * solver)

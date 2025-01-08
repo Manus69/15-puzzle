@@ -1,5 +1,29 @@
 #include "Npuzzle.h"
 
+//naive v
+int Npuzzle_count_invs(Npuzzle const * np)
+{
+    int inv;
+    int lhs, rhs;
+
+    inv = 0;
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
+    {
+        lhs = sym_val(Npuzzle_at(np, k));
+        if (lhs == 0) continue;
+
+        for (int w = k + 1; w < NP_GRID_SIZE * NP_GRID_SIZE; w ++)
+        {
+            rhs = sym_val(Npuzzle_at(np, w));
+            if (rhs == 0) continue;
+
+            if (lhs > rhs) inv ++;
+        }
+    }
+
+    return inv;
+}
+
 int Npuzzle_measure_disorder(Npuzzle const * np)
 {
     int idx, count;
@@ -7,11 +31,28 @@ int Npuzzle_measure_disorder(Npuzzle const * np)
     count = 0;
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
+        // if (k == np->hole_idx) continue;
+
         idx = sym_target_idx(Npuzzle_at(np, k));
         count += idx != k;
     }
 
     return count;
+}
+
+int Npuzzle_measure_distance(Npuzzle const * np)
+{
+    int tot;
+    int ds;
+
+    tot = 0;
+    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
+    {
+        ds = abs(k - sym_target_idx(Npuzzle_at(np, k)));
+        tot += ds;
+    }
+
+    return tot;
 }
 
 static int _ds(int row_col, unsigned * seed)

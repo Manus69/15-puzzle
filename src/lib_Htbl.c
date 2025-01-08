@@ -134,6 +134,7 @@ Htbl * Htbl_new(int isize)
 void Htbl_del(Htbl * htbl)
 {
     free(htbl->mem);
+    free(htbl);
 }
 
 // #include "dbg.h"
@@ -171,23 +172,7 @@ int Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq)
 
 void Htbl_purge(Htbl * htbl)
 {
+    memset(htbl->mem, 0, htbl->isize * htbl->len);
     htbl->count = 0;
 }
 
-// static bool _eq_int(void const * lhs, void const * rhs)
-// {
-//     return * (int *) lhs == * (int *) rhs;
-// }
-
-// static unsigned long _hash_int(void const * x)
-// {
-//     return * (unsigned long *) x;
-// }
-
-// void Htbl_test(void)
-// {
-//     Htbl * htbl;
-
-//     htbl = Htbl_new(sizeof(int));
-
-// }

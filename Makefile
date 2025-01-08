@@ -6,6 +6,8 @@ cc = gcc
 dbg: flags := -Wall -Wextra -g3
 dbg: compile
 
+rel: flags := -Wall -Wextra -Ofast -flto
+rel: compile 
+
 compile:
 	$(cc) -o $(target) $(flags) $(src) -lraylib -lm 
-
