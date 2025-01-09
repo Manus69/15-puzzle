@@ -113,13 +113,13 @@ int Htbl_count(Htbl const * htbl)
     return htbl->count;
 }
 
-Htbl * Htbl_new(int isize)
+Htbl * Htbl_new(int isize, int capacity)
 {
     Htbl * htbl;
 
     if ((htbl = calloc(1, sizeof(* htbl))))
     {
-        if ((htbl->mem = calloc(HTBL_DC, isize)))
+        if ((htbl->mem = calloc(capacity, isize)))
         {
             htbl->isize = isize;
             htbl->len = HTBL_DC;

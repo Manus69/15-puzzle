@@ -122,13 +122,12 @@ void *  Vec_get(Vec const * vec, int idx);
 void    Vec_set(Vec * vec, int idx, void const * item);
 bool    Vec_push(Vec * vec, void const * item);
 void *  Vec_pop(Vec * vec);
-
-
+void *  Vec_pop_all(Vec * vec);
 
 typedef struct Htbl Htbl;
 
 int     Htbl_count(Htbl const * htbl);
-Htbl *  Htbl_new(int isize);
+Htbl *  Htbl_new(int isize, int capacity);
 void    Htbl_del(Htbl * htbl);
 void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq);
 int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq);
@@ -137,9 +136,11 @@ void    Htbl_purge(Htbl * htbl);
 typedef struct Heap Heap;
 
 Heap *  Heap_new(int isize, int capacity);
+int     Heap_count(Heap const * heap);
 void    Heap_del(Heap * heap);
 bool    Heap_insert(Heap * heap, void const * item, cmpf cmp, swapf swap);
 void *  Heap_pop(Heap * heap, cmpf cmp, swapf swap);
+void    Heap_purge(Heap * heap);
 
 
 #endif

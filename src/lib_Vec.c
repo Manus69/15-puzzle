@@ -93,3 +93,10 @@ void * Vec_pop(Vec * vec)
 
     return _end(vec);
 }
+
+void * Vec_pop_all(Vec * vec)
+{
+    vec->idx = 0;
+    
+    return Vec_get(vec, 0);
+}

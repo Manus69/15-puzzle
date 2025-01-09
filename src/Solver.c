@@ -8,11 +8,6 @@ typedef struct
     int     disorder;
 }   Pos;
 
-static bool _Pos_impossible(Pos const * pos)
-{
-    return pos->disorder == __INT_MAX__;
-}
-
 static int _Pos_cmpf(void const * _lhs, void const * _rhs)
 {
     Pos * lhs;
@@ -24,81 +19,95 @@ static int _Pos_cmpf(void const * _lhs, void const * _rhs)
     return lhs->disorder < rhs->disorder ? -1 : lhs->disorder > rhs->disorder;
 }
 
-static Pos _pos_from_np(Npuzzle const * np, char dir, int (* _metric)(Npuzzle const *))
+static void _Pos_swapf(void * lhs, void * rhs)
 {
-    Pos pos;
-
-    pos.np = * np;
-    if (Npuzzle_move_dir_check(& pos.np, dir))
-    {
-        // pos.disorder = Npuzzle_measure_disorder(& pos.np);
-        pos.disorder = _metric(& pos.np);
-    }
-    else
-    {
-        pos.disorder = __INT_MAX__;
-    }
-
-    return pos;
+    $swap(Pos, lhs, rhs);
 }
 
-static int _solve(Solver * solver, Pos const * pos, int idx, int (*_metric)(Npuzzle const *))
+static bool _Pos_from_np(Pos * pos, Npuzzle const * np, char dir, int (* metric)(Npuzzle const *))
 {
-    Pos next[NP_NDIRS];
-    int pos_count;
-    int sln;
-
-    if (Npuzzle_solved(& pos->np))  return 0;
-    if (idx >= SOLVER_BS)           return -1;
-    if (Htbl_insert(solver->htbl, & pos->np, Npuzzle_hashf, Npuzzle_eqf) <= 0) return -1;
-
-    pos_count = NP_NDIRS;
-    for (int k = 0; k < NP_NDIRS; k ++)
+    pos->np = * np;
+    if (Npuzzle_move_dir_check(& pos->np, dir))
     {
-        next[k] = _pos_from_np(& pos->np, NP_DIRS[k], _metric);
-        if (_Pos_impossible(next + k)) pos_count --;
+        pos->disorder = metric(& pos->np);
+
+        return true;
     }
 
-    qsort(next, NP_NDIRS, sizeof(Pos), _Pos_cmpf);
+    return false;
+}
 
-    for (int k = 0; k < pos_count; k ++)
+static int _visit(Solver * solver, Pos const * pos, int (* metric)(Npuzzle const *))
+{
+    Pos next;
+    int count;
+
+    count = 0;
+    for (int k = 0; k < NP_NDIRS; k ++)
     {
-        sln = _solve(solver, next + k, idx + 1, _metric);
-        if (sln >= 0)
+        if (_Pos_from_np(& next, & pos->np, NP_DIRS[k], metric))
         {
-            solver->buff[idx] = dir_idx_idx(Npuzzle_hole_idx(& pos->np), Npuzzle_hole_idx(& next[k].np));
-            return 1 + sln;
+            if (Htbl_insert(solver->htbl, & next.np, Npuzzle_hashf, Npuzzle_eqf) > 0)
+            {
+                if (! Heap_insert(solver->heap, & next, _Pos_cmpf, _Pos_swapf))
+                {
+                    return -1;
+                }
+
+                count ++;
+            }
         }
     }
 
-    return -1;
+    return count;
+}
+
+static int _solve(Solver * solver, int (* metric)(Npuzzle const *))
+{
+    Pos * pos;
+
+    while (true)
+    {
+        if (! Heap_count(solver->heap)) return -1;
+        pos = Heap_pop(solver->heap, _Pos_cmpf, _Pos_swapf);
+
+        if (Npuzzle_solved(& pos->np))  return 0;
+
+        _visit(solver, pos, metric);
+    }
 }
 
 int Solver_solve(Solver * solver, Npuzzle const * np)
 {
     Pos pos;
-    int (* mertic)(Npuzzle const *) = Npuzzle_measure_distance;
+    int (* metric)(Npuzzle const *) = Npuzzle_measure_distance;
 
     memset(solver->buff, 0, SOLVER_BS);
     Htbl_purge(solver->htbl);
+    Heap_purge(solver->heap);
 
     pos = (Pos)
     {
         .np = * np,
-        .disorder = mertic(np),
+        .disorder = metric(np),
     };
 
-    return _solve(solver, & pos, 0, mertic);
+    _visit(solver, & pos, metric);
+
+    return _solve(solver, metric);
 }
 
+#define _DC (1 << 10)
 bool Solver_init(Solver * solver)
 {
-    return (solver->htbl = Htbl_new(sizeof(Npuzzle)));
+    return ((solver->htbl = Htbl_new(sizeof(Npuzzle), _DC)) &&
+            (solver->heap = Heap_new(sizeof(Pos), _DC)));
 }
 
 void Solver_deinit(Solver * solver)
 {
     Htbl_del(solver->htbl);
+    Heap_del(solver->heap);
 }
 
 int Solver_npos(Solver const * solver)

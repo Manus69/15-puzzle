@@ -9,6 +9,7 @@ typedef struct
 {
     char    buff[SOLVER_BS];
     Htbl *  htbl;
+    Heap * heap;
 }   Solver;
 
 int     Solver_solve(Solver * solver, Npuzzle const * np);

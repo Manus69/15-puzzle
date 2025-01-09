@@ -58,6 +58,11 @@ void Heap_del(Heap * heap)
     free(heap);
 }
 
+int Heap_count(Heap const * heap)
+{
+    return Vec_len(heap->vec);
+}
+
 static void _insert(Heap * heap, cmpf cmp, swapf swap, int idx)
 {
     int     parent_idx;
@@ -138,4 +143,9 @@ void * Heap_pop(Heap * heap, cmpf cmp, swapf swap)
     _propagate_down(heap, cmp, swap, 0, Vec_len(heap->vec) - 1);
 
     return Vec_pop(heap->vec);
+}
+
+void Heap_purge(Heap * heap)
+{
+    Vec_pop_all(heap->vec);
 }
