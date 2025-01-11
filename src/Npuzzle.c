@@ -40,11 +40,6 @@ int Npuzzle_measure_disorder(Npuzzle const * np)
     return count;
 }
 
-int Npuzzle_distance0(Npuzzle const * np)
-{
-    return abs(sym_target_idx('0') - np->hole_idx);
-}
-
 int Npuzzle_measure_distance(Npuzzle const * np)
 {
     int tot;

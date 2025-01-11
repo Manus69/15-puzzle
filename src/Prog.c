@@ -78,18 +78,13 @@ static void _solve(Prog * prog)
     int len;
 
     len = Solver_solve(& prog->solver, & prog->np);
+        
+    if (len < 0) return dbg_msg("Failed to solve");
 
-    if (len >= 0) 
+    // printf("Solution: %s\n len: %d\n", prog->solver.buff, len);
+    for (int k = 0; k < len; k ++)
     {
-        printf("Solution: %s\n len: %d\n", prog->solver.buff, len);
-        for (int k = 0; k < len; k ++)
-        {
-            _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 2);
-        }
-    }
-    else
-    {
-        dbg_msg("Failed to solve");
+        _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 2);
     }
 }
 

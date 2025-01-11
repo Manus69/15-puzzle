@@ -1,7 +1,7 @@
 #ifndef LIB_H
 #define LIB_H
 
-#define LIB_PATH "../../_slib/_slib.h"
+#define LIB_PATH "_slib.h"
 #include LIB_PATH
 
 #define RBUFF_SIZE (1 << 10)
