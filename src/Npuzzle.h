@@ -124,6 +124,7 @@ static inline bool Npuzzle_eqf(void const * lhs, void const * rhs)
 
 int     Npuzzle_measure_disorder(Npuzzle const * np);
 int     Npuzzle_count_invs(Npuzzle const * np);
+int     Npuzzle_distance0(Npuzzle const * np);
 int     Npuzzle_measure_distance(Npuzzle const * np);
 void    Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len);
 

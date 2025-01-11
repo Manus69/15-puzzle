@@ -31,13 +31,18 @@ int Npuzzle_measure_disorder(Npuzzle const * np)
     count = 0;
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
-        // if (k == np->hole_idx) continue;
+        if (k == np->hole_idx) continue;
 
         idx = sym_target_idx(Npuzzle_at(np, k));
         count += idx != k;
     }
 
     return count;
+}
+
+int Npuzzle_distance0(Npuzzle const * np)
+{
+    return abs(sym_target_idx('0') - np->hole_idx);
 }
 
 int Npuzzle_measure_distance(Npuzzle const * np)

@@ -1,26 +1,26 @@
 #ifndef DBG_H
 #define DBG_H
 
-#include "Npuzzle.h"
-#include "Solver.h"
+#include "Prog.h"
 
 #include <stdio.h>
 
-static inline void _dbg_msg(char const * msg)
+static inline void dbg_msg(char const * msg)
 {
     printf("-----\nDBG %s\n", msg);
 }
 
-static inline void dbg_Npuzzle(Npuzzle const * np)
+static inline void dbg_Npuzzle(Npuzzle const * np, bool metrics)
 {
-    _dbg_msg("pos:");
+    dbg_msg("pos:");
     printf("%.*s\n", NP_GRID_SIZE * NP_GRID_SIZE, Npuzzle_cstr(np));
-}
 
-static inline void dbg_Solver(Solver const * solver)
-{
-    _dbg_msg("solver:");
-    printf("%d\n", Solver_npos(solver));
+    if (metrics)
+    {
+        printf("disorder :  %d\n", Npuzzle_measure_disorder(np));
+        printf("invs :      %d\n", Npuzzle_count_invs(np));
+        printf("distance : %d\n\n", Npuzzle_measure_distance(np));
+    }
 }
 
 #endif

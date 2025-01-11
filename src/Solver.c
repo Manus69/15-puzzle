@@ -1,129 +1,202 @@
 #include "Solver.h"
+#include "dbg.h"
 
 #include <assert.h>
 #include <string.h>
 
 typedef struct
 {
-    Npuzzle np;
-    int     disorder;
+    int id;
+    int metric;
+}   Elem;
+
+$swapf_gen(Elem)
+
+static inline int Elem_cmpf(void const * lhs, void const * rhs)
+{
+    Elem const * _lhs, * _rhs;
+
+    _lhs = lhs;
+    _rhs = rhs;
+
+    return _lhs->metric < _rhs->metric ? -1 : _lhs->metric > _rhs->metric;
+}
+
+typedef struct
+{
+    int         id;
+    int         parent_id;
+    int         metric;
 }   Pos;
 
-$swapf_gen(Pos)
+typedef int (* metricf)(Npuzzle const *);
 
-static int _Pos_cmpf(void const * _lhs, void const * _rhs)
+static inline int _cum_metric(Npuzzle const * np)
 {
-    Pos * lhs;
-    Pos * rhs;
-
-    lhs = (Pos *) _lhs;
-    rhs = (Pos *) _rhs;
-
-    return lhs->disorder < rhs->disorder ? -1 : lhs->disorder > rhs->disorder;
+    return Npuzzle_measure_disorder(np);
+    // return Npuzzle_measure_distance(np);
 }
 
-static bool _Pos_from_np(Pos * pos, Npuzzle const * np, char dir, int (* metric)(Npuzzle const *))
+static Pos _Solver_pos(Solver const * solver, int id)
 {
-    pos->np = * np;
-    if (Npuzzle_move_dir_check(& pos->np, dir))
+    return (Pos)
     {
-        pos->disorder = metric(& pos->np);
-
-        return true;
-    }
-
-    return false;
+        .id = id,
+        .metric = $drf(int) Vec_get(& solver->metric_vec, id),
+        .parent_id = $drf(int) Vec_get(& solver->parent_vec, id),
+    };
 }
 
-static void _add_to_queue(Solver * solver, Pos const * pos)
+static Npuzzle * _Solver_np(Solver const * solver, int id)
 {
-    bool res;
-
-    res =  Heap_insert_check(& solver->heap, pos, _Pos_cmpf, Pos_swapf);
-    assert(res);
+    return Vec_get(& solver->np_vec, id);
 }
 
-static Pos _pop_queue(Solver * solver)
+static void _Solver_add(Solver * solver, Npuzzle const * np, int parent_id)
 {
-    assert(Heap_count(& solver->heap) > 0);
+    Elem    elem;
+    int     id;
+    int     met;
 
-    return * (Pos *) Heap_pop_top(& solver->heap, _Pos_cmpf, Pos_swapf);
-}
+    id = Vec_len(& solver->np_vec);
+    met = _cum_metric(np);
 
-static bool _add_to_tbl(Solver * solver, Pos const * pos)
-{
-    bool res;
-
-    if (Htbl_get(& solver->htbl, & pos->np, Npuzzle_hashf, Npuzzle_eqf)) return false;
-
-    res = Htbl_insert_check(& solver->htbl, & pos->np, Npuzzle_hashf);
-    assert(res);
-
-    return true;
-}
-
-static bool _visit(Solver * solver, Pos const * pos, int (* metric)(Npuzzle const *))
-{
-    Pos next;
-
-    if (Npuzzle_solved(& pos->np)) return true;
-    for (int k = 0; k < NP_NDIRS; k ++)
+    elem = (Elem)
     {
-        if (_Pos_from_np(& next, & pos->np, NP_DIRS[k], metric))
-        {
-            if (_add_to_tbl(solver, & next))
-            {
-                _add_to_queue(solver, & next);
-            }
-        }
-    }
+        .id = id,
+        .metric = met,
+    };
 
-    return false;
+    assert(Heap_insert_check(& solver->queue, & elem, Elem_cmpf, Elem_swapf));
+    assert(Htbl_insert_check(& solver->np_tbl, np, Npuzzle_hashf));
+    assert(Vec_push_check(& solver->metric_vec, & met));
+    assert(Vec_push_check(& solver->np_vec, np));
+    assert(Vec_push_check(& solver->parent_vec, & parent_id));
 }
 
-static int _solve(Solver * solver, int (* metric)(Npuzzle const *))
+static bool _Solver_check_visited(Solver const * solver, Npuzzle const * np)
 {
-    Pos current;
+    return Htbl_get(& solver->np_tbl, np, Npuzzle_hashf, Npuzzle_eqf);
+}
+
+static Pos _Solver_peek_top(Solver * solver)
+{
+    Elem    elm;
+    Pos     pos;
+
+    elm = $drf(Elem) Heap_top(& solver->queue);
+    pos = _Solver_pos(solver, elm.id);
+
+    return pos;
+}
+
+static void _Solver_pop_top(Solver * solver)
+{
+    Heap_pop_top(& solver->queue, Elem_cmpf, Elem_swapf);
+}
+
+static int _Solver_backtrack(Solver * solver)
+{
+    int     len;
+    char    dir;
+    Pos     pos;
+    Pos     parent;
+
+    len = 0;
+    pos = _Solver_peek_top(solver);
 
     while (true)
     {
-        current = _pop_queue(solver);
-        if (_visit(solver, & current, metric)) return Htbl_count(& solver->htbl);
+        if (len >= SOLVER_BS) return NO_IDX;
+        if (pos.parent_id == NO_IDX)
+        {
+            return len;
+        }
+
+        parent = _Solver_pos(solver, pos.parent_id);
+        dir = dir_idx_idx(Npuzzle_hole_idx(_Solver_np(solver, parent.id)), 
+                        Npuzzle_hole_idx(_Solver_np(solver, pos.id)));
+        
+        solver->buff[len] = dir;
+        len ++;
+        pos = parent;
     }
+}
+
+static void _Solver_next(Solver * solver, Pos const * pos, char dir)
+{
+    Npuzzle np;
+
+    np = $drf(Npuzzle) _Solver_np(solver, pos->id);
+
+    if (! Npuzzle_move_dir_check(& np, dir)) return ;
+    if (_Solver_check_visited(solver, & np)) return ;
+    
+    _Solver_add(solver, & np, pos->id);
+}
+
+static bool _Solver_visit(Solver * solver)
+{
+    Pos         pos;
+    Npuzzle *   np;
+
+    pos = _Solver_peek_top(solver);
+    np = _Solver_np(solver, pos.id);
+
+    if (Npuzzle_solved(np))
+    {
+        return true;
+    }
+
+    _Solver_pop_top(solver);
+
+    for (int k = 0; k < NP_NDIRS; k ++)
+    {
+        _Solver_next(solver, & pos, NP_DIRS[k]);
+    }
+
+    return false;
+}
+
+static void _Solver_pop_all(Solver * solver)
+{
+    Vec_pop_all(& solver->metric_vec);
+    Vec_pop_all(& solver->np_vec);
+    Vec_pop_all(& solver->parent_vec);
+    Heap_pop_all(& solver->queue);
+    Htbl_purge(& solver->np_tbl);
 }
 
 int Solver_solve(Solver * solver, Npuzzle const * np)
 {
-    Pos pos;
-    int (* metric)(Npuzzle const *) = Npuzzle_measure_distance;
-
     memset(solver->buff, 0, SOLVER_BS);
-    Htbl_purge(& solver->htbl);
-    Heap_pop_all(& solver->heap);
+    _Solver_pop_all(solver);
+    _Solver_add(solver, np, NO_IDX);
 
-    pos = (Pos)
+    while (true)
     {
-        .np = * np,
-        .disorder = metric(np),
-    };
-
-    _add_to_queue(solver, & pos);
-    _add_to_tbl(solver, & pos);
-
-    return _solve(solver, metric);
+        if (Heap_empty(& solver->queue)) return -1;
+        if (_Solver_visit(solver)) return _Solver_backtrack(solver);
+    }
 }
 
 #define _DC (1 << 10)
 bool Solver_init(Solver * solver)
 {
-    return ((Htbl_new_capacity(& solver->htbl, sizeof(Npuzzle), _DC)) &&
-            (Heap_new_capacity(& solver->heap, sizeof(Pos), _DC)));
+    return ((Vec_new_capacity(& solver->metric_vec, sizeof(int), _DC)) && 
+            (Vec_new_capacity(& solver->np_vec, sizeof(Npuzzle), _DC)) &&
+            (Vec_new_capacity(& solver->parent_vec, sizeof(int), _DC)) &&
+            (Htbl_new_capacity(& solver->np_tbl, sizeof(Npuzzle), _DC)) &&
+            (Heap_new_capacity(& solver->queue, sizeof(Elem), _DC)));
 }
 
 void Solver_deinit(Solver * solver)
 {
-    Htbl_del(& solver->htbl);
-    Heap_del(& solver->heap);
+    Vec_del(& solver->metric_vec);
+    Vec_del(& solver->np_vec);
+    Vec_del(& solver->parent_vec);
+    Htbl_del(& solver->np_tbl);
+    Heap_del(& solver->queue);
 }
 
 

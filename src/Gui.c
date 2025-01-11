@@ -108,7 +108,7 @@ void _Grid_draw(Gui * gui)
 void Gui_draw(Gui * gui)
 {
     BeginDrawing();
-    ClearBackground(GRAY);
+    ClearBackground(RAYWHITE);
 
     _Grid_draw(gui);
 

@@ -4,6 +4,7 @@
 #define CSTR_DFLT   "123456789abcdef0"
 #define NCYCLES     (10)
 #define BUFF_SIZE   (RBUFF_SIZE)
+#define SCRAMBLELN  (1 << 5)
 
 bool Prog_start(Prog * prog)
 {
@@ -36,15 +37,7 @@ static void _try_dir(Prog * prog, char dir)
         Gui_grid_move(& prog->gui, to, prog->speed);
     }
 
-    //
-    // if (Npuzzle_solved(& prog->np))
-    // {
-    //     printf("solved\n");
-    // }
-    //
-    printf("disorder :  %d\n", Npuzzle_measure_disorder(& prog->np));
-    printf("invs :      %d\n", Npuzzle_count_invs(& prog->np));
-    printf("distance : %d\n\n", Npuzzle_measure_distance(& prog->np));
+    // dbg_Npuzzle(& prog->np, 1);
 }
 
 static bool _Prog_queue_action(Prog * prog, char x, int speed)
@@ -64,7 +57,6 @@ static bool _Prog_perform_action(Prog * prog)
 
     _try_dir(prog, Rbuff_pop(& prog->action_buff));
 
-
     return true;
 }
 
@@ -74,9 +66,6 @@ static void _scramble(Prog * prog, int nmoves)
 
     if (nmoves >= BUFF_SIZE) return ;
     Npuzzle_scramble_seq(& prog->np, buff, nmoves);
-
-    //
-    // printf("%s\n", buff);
 
     for (int k = 0; k < nmoves; k ++)
     {
@@ -92,11 +81,15 @@ static void _solve(Prog * prog)
 
     if (len >= 0) 
     {
-        printf("Solution: %s\n", prog->solver.buff);
+        printf("Solution: %s\n len: %d\n", prog->solver.buff, len);
+        for (int k = 0; k < len; k ++)
+        {
+            _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 2);
+        }
     }
     else
     {
-        printf("Failed to solve\n");
+        dbg_msg("Failed to solve");
     }
 }
 
@@ -109,7 +102,7 @@ void Prog_input(Prog * prog)
     else if (IsKeyPressed(KEY_RIGHT))   _Prog_queue_action(prog, 'l', NCYCLES);
     else if (IsKeyPressed(KEY_DOWN))    _Prog_queue_action(prog, 'u', NCYCLES);
     else if (IsKeyPressed(KEY_LEFT))    _Prog_queue_action(prog, 'r', NCYCLES);
-    else if (IsKeyPressed(KEY_SPACE))   _scramble(prog, BUFF_SIZE - 1);
+    else if (IsKeyPressed(KEY_SPACE))   _scramble(prog, $min(SCRAMBLELN, BUFF_SIZE));
     else if (IsKeyPressed(KEY_S))       _solve(prog);
 }
 

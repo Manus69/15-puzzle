@@ -4,7 +4,7 @@
 #define LIB_PATH "../../_slib/_slib.h"
 #include LIB_PATH
 
-#define RBUFF_SIZE (1 << 5)
+#define RBUFF_SIZE (1 << 10)
 
 typedef struct
 {
