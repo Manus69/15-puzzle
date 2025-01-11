@@ -55,7 +55,7 @@ int Npuzzle_measure_distance(Npuzzle const * np)
     return tot;
 }
 
-static int _ds(int row_col, unsigned * seed)
+static int _ds(int row_col, u64 * seed)
 {
     if      (row_col == 0) return 1;
     else if (row_col == NP_GRID_SIZE - 1) return -1;
@@ -63,7 +63,7 @@ static int _ds(int row_col, unsigned * seed)
     return rng_xor(seed) % 2 ? -1 : 1;
 }
 
-static char _random_dir(Npuzzle const * np, unsigned * seed, int k)
+static char _random_dir(Npuzzle const * np, u64 * seed, int k)
 {
     int idx, row, col;
     int drow, dcol;
@@ -88,9 +88,9 @@ static char _random_dir(Npuzzle const * np, unsigned * seed, int k)
 
 void Npuzzle_scramble_seq(Npuzzle const * np, char * buff, int len)
 {
-    Npuzzle     copy;
-    unsigned    seed;
-    char        dir;
+    Npuzzle copy;
+    u64     seed;
+    char    dir;
 
     copy = * np;
     seed = GetTime() + len;

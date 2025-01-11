@@ -1,45 +1,10 @@
 #ifndef LIB_H
 #define LIB_H
 
-#include <stdbool.h>
+#define LIB_PATH "../../_slib/_slib.h"
+#include LIB_PATH
 
 #define RBUFF_SIZE (1 << 5)
-
-#define $swap(T, x, y) \
-{\
-    T _t = * (T *) (x);\
-    * (T *) (x) = * (T *) (y);\
-    * (T *) (y) = _t;\
-}
-
-typedef int  (* cmpf)(void const *, void const *);
-typedef bool (* eqf)(void const *, void const *);
-typedef void (* swapf)(void *, void *);
-typedef unsigned long (* hashf)(void const *);
-
-static inline unsigned rng_xor(unsigned * seed)
-{
-    unsigned x;
-
-    x = * seed;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-
-    return * seed = x;
-}
-
-static inline unsigned long hash(unsigned char const * bytes, int len)
-{
-    unsigned long hash = 5381;
-
-    for (int k = 0; k < len; k ++)
-    {
-        hash = hash * 33 + bytes[k];
-    }
-
-    return hash;
-}
 
 typedef struct
 {
@@ -111,36 +76,6 @@ static inline void Rbuff_pushc_forced(Rbuff * rbuff, char x)
 
     Rbuff_pushc(rbuff, x);
 }
-
-typedef struct Vec Vec;
-
-Vec *   Vec_new(int isize, int capacity);
-void    Vec_del(Vec * vec);
-int     Vec_len(Vec const * vec);
-int     Vec_empty(Vec const * vec);
-void *  Vec_get(Vec const * vec, int idx);
-void    Vec_set(Vec * vec, int idx, void const * item);
-bool    Vec_push(Vec * vec, void const * item);
-void *  Vec_pop(Vec * vec);
-void *  Vec_pop_all(Vec * vec);
-
-typedef struct Htbl Htbl;
-
-int     Htbl_count(Htbl const * htbl);
-Htbl *  Htbl_new(int isize, int capacity);
-void    Htbl_del(Htbl * htbl);
-void *  Htbl_get(Htbl const * htbl, void const * item, hashf hf, eqf eq);
-int     Htbl_insert(Htbl * htbl, void const * item, hashf hf, eqf eq);
-void    Htbl_purge(Htbl * htbl);
-
-typedef struct Heap Heap;
-
-Heap *  Heap_new(int isize, int capacity);
-int     Heap_count(Heap const * heap);
-void    Heap_del(Heap * heap);
-bool    Heap_insert(Heap * heap, void const * item, cmpf cmp, swapf swap);
-void *  Heap_pop(Heap * heap, cmpf cmp, swapf swap);
-void    Heap_purge(Heap * heap);
 
 
 #endif

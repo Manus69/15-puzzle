@@ -1,5 +1,6 @@
 #include "Solver.h"
 
+#include <assert.h>
 #include <string.h>
 
 typedef struct
@@ -7,6 +8,8 @@ typedef struct
     Npuzzle np;
     int     disorder;
 }   Pos;
+
+$swapf_gen(Pos)
 
 static int _Pos_cmpf(void const * _lhs, void const * _rhs)
 {
@@ -17,11 +20,6 @@ static int _Pos_cmpf(void const * _lhs, void const * _rhs)
     rhs = (Pos *) _rhs;
 
     return lhs->disorder < rhs->disorder ? -1 : lhs->disorder > rhs->disorder;
-}
-
-static void _Pos_swapf(void * lhs, void * rhs)
-{
-    $swap(Pos, lhs, rhs);
 }
 
 static bool _Pos_from_np(Pos * pos, Npuzzle const * np, char dir, int (* metric)(Npuzzle const *))
@@ -37,43 +35,60 @@ static bool _Pos_from_np(Pos * pos, Npuzzle const * np, char dir, int (* metric)
     return false;
 }
 
-static int _visit(Solver * solver, Pos const * pos, int (* metric)(Npuzzle const *))
+static void _add_to_queue(Solver * solver, Pos const * pos)
+{
+    bool res;
+
+    res =  Heap_insert_check(& solver->heap, pos, _Pos_cmpf, Pos_swapf);
+    assert(res);
+}
+
+static Pos _pop_queue(Solver * solver)
+{
+    assert(Heap_count(& solver->heap) > 0);
+
+    return * (Pos *) Heap_pop_top(& solver->heap, _Pos_cmpf, Pos_swapf);
+}
+
+static bool _add_to_tbl(Solver * solver, Pos const * pos)
+{
+    bool res;
+
+    if (Htbl_get(& solver->htbl, & pos->np, Npuzzle_hashf, Npuzzle_eqf)) return false;
+
+    res = Htbl_insert_check(& solver->htbl, & pos->np, Npuzzle_hashf);
+    assert(res);
+
+    return true;
+}
+
+static bool _visit(Solver * solver, Pos const * pos, int (* metric)(Npuzzle const *))
 {
     Pos next;
-    int count;
 
-    count = 0;
+    if (Npuzzle_solved(& pos->np)) return true;
     for (int k = 0; k < NP_NDIRS; k ++)
     {
         if (_Pos_from_np(& next, & pos->np, NP_DIRS[k], metric))
         {
-            if (Htbl_insert(solver->htbl, & next.np, Npuzzle_hashf, Npuzzle_eqf) > 0)
+            if (_add_to_tbl(solver, & next))
             {
-                if (! Heap_insert(solver->heap, & next, _Pos_cmpf, _Pos_swapf))
-                {
-                    return -1;
-                }
-
-                count ++;
+                _add_to_queue(solver, & next);
             }
         }
     }
 
-    return count;
+    return false;
 }
 
 static int _solve(Solver * solver, int (* metric)(Npuzzle const *))
 {
-    Pos * pos;
+    Pos current;
 
     while (true)
     {
-        if (! Heap_count(solver->heap)) return -1;
-        pos = Heap_pop(solver->heap, _Pos_cmpf, _Pos_swapf);
-
-        if (Npuzzle_solved(& pos->np))  return 0;
-
-        _visit(solver, pos, metric);
+        current = _pop_queue(solver);
+        if (_visit(solver, & current, metric)) return Htbl_count(& solver->htbl);
     }
 }
 
@@ -83,8 +98,8 @@ int Solver_solve(Solver * solver, Npuzzle const * np)
     int (* metric)(Npuzzle const *) = Npuzzle_measure_distance;
 
     memset(solver->buff, 0, SOLVER_BS);
-    Htbl_purge(solver->htbl);
-    Heap_purge(solver->heap);
+    Htbl_purge(& solver->htbl);
+    Heap_pop_all(& solver->heap);
 
     pos = (Pos)
     {
@@ -92,7 +107,8 @@ int Solver_solve(Solver * solver, Npuzzle const * np)
         .disorder = metric(np),
     };
 
-    _visit(solver, & pos, metric);
+    _add_to_queue(solver, & pos);
+    _add_to_tbl(solver, & pos);
 
     return _solve(solver, metric);
 }
@@ -100,43 +116,15 @@ int Solver_solve(Solver * solver, Npuzzle const * np)
 #define _DC (1 << 10)
 bool Solver_init(Solver * solver)
 {
-    return ((solver->htbl = Htbl_new(sizeof(Npuzzle), _DC)) &&
-            (solver->heap = Heap_new(sizeof(Pos), _DC)));
+    return ((Htbl_new_capacity(& solver->htbl, sizeof(Npuzzle), _DC)) &&
+            (Heap_new_capacity(& solver->heap, sizeof(Pos), _DC)));
 }
 
 void Solver_deinit(Solver * solver)
 {
-    Htbl_del(solver->htbl);
-    Heap_del(solver->heap);
+    Htbl_del(& solver->htbl);
+    Heap_del(& solver->heap);
 }
 
-int Solver_npos(Solver const * solver)
-{
-    return Htbl_count(solver->htbl);
-}
-
-//123456709ab8defc
-
-void Solver_test(Solver * solver)
-{
-    Npuzzle np;
-
-    Npuzzle_init(& np, "123456709ab8defc");
-    Htbl_insert(solver->htbl, & np, Npuzzle_hashf, Npuzzle_eqf);
-    Htbl_insert(solver->htbl, & np, Npuzzle_hashf, Npuzzle_eqf);
-
-
-}
-
-bool Solver_test_not_visited(Solver * solver, Npuzzle const * np)
-{
-    // void * ptr;
-
-    // ptr = Htbl_get(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf);
-
-    // return ptr;
-
-    return Htbl_insert(solver->htbl, np, Npuzzle_hashf, Npuzzle_eqf) > 0;
-}
 
 

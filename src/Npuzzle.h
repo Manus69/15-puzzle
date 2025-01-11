@@ -97,12 +97,12 @@ static inline bool Npuzzle_solved(Npuzzle const * np)
     return true;
 }
 
-static inline unsigned long Npuzzle_hash(Npuzzle const * np)
+static inline u64 Npuzzle_hash(Npuzzle const * np)
 {
-    return hash((unsigned char const *) np->vals, NP_GRID_SIZE * NP_GRID_SIZE);
+    return hash_djb((unsigned char const *) np->vals, NP_GRID_SIZE * NP_GRID_SIZE);
 }
 
-static inline unsigned long Npuzzle_hashf(void const * ptr)
+static inline u64 Npuzzle_hashf(void const * ptr)
 {
     return Npuzzle_hash(ptr);
 }

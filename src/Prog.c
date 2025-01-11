@@ -1,5 +1,4 @@
 #include "Prog.h"
-#include "sln.h"
 #include "dbg.h"
 
 #define CSTR_DFLT   "123456789abcdef0"
@@ -101,26 +100,10 @@ static void _solve(Prog * prog)
     }
 }
 
-static void _test(Prog * prog)
-{
-//
-    if (Solver_test_not_visited(& prog->solver, & prog->np))
-    {
-        dbg_Npuzzle(& prog->np);
-        dbg_Solver(& prog->solver);
-        // Solver_test(& prog->solver);
-    }
-}
-
 void Prog_input(Prog * prog)
 {
     if (WindowShouldClose()) { prog->runs = false; return ; }
     if (Gui_grid_in_animation(& prog->gui)) return ;
-
-    if (GetKeyPressed())
-    {
-        // _test(prog);
-    }
 
     if      (IsKeyPressed(KEY_UP))      _Prog_queue_action(prog, 'd', NCYCLES);
     else if (IsKeyPressed(KEY_RIGHT))   _Prog_queue_action(prog, 'l', NCYCLES);
