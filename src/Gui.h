@@ -21,11 +21,15 @@ typedef struct
 {
     Texture2D   texture;
     Rectangle   src[NP_GRID_SIZE * NP_GRID_SIZE];
+    Rectangle   frame;
+    Rectangle   bg;
 }   Tx;
 
 typedef struct
 {
     Rectangle   rect;
+    Rectangle   frame;
+    Rectangle   bg;
     Grid        grid;
     Tx          tx;
 }   Gui;

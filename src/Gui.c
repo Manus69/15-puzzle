@@ -43,26 +43,60 @@ static int _Window_w(void)
 
 static bool _Tx_init(Gui * gui)
 {
+    int idx;
+
     gui->tx.texture = LoadTexture(TX_PATH);
     if (gui->tx.texture.id == 0) return false;
 
-    for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
+    for (int k = 1; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
+        int row, col;
+
+        idx = k - 1;
+        row = idx_row(idx);
+        col = idx_col(idx);
+
         gui->tx.src[k] = (Rectangle)
         {
-            .x = k * TX_CELL_SIZE,
-            .y = 0,
+            .x = col * TX_CELL_SIZE,
+            .y = row * TX_CELL_SIZE,
             .width = TX_CELL_SIZE,
             .height = TX_CELL_SIZE,
         };
     }
 
+    gui->tx.frame = (Rectangle)
+    {
+        .x = 400,
+        .y = 0,
+        .height = 500,
+        .width = 490,
+    };
+
+    gui->tx.bg = (Rectangle)
+    {
+        .x = 910,
+        .y = 0,
+        .width = 410,
+        .height = 410,
+    };
+
     return true;
 }
 
-static void _Grid_init(Gui * gui)
+#define PAD 5
+static void _Gui_elem_init(Gui * gui)
 {
-    gui->grid.rect = gui->rect;
+    gui->frame = gui->rect;
+    gui->grid.rect = (Rectangle)
+    {
+        .x = gui->frame.x + FRAME_THICKNESS + 2 * PAD,
+        .y = gui->frame.y + FRAME_THICKNESS,
+        .width = gui->frame.width - 2 * FRAME_THICKNESS,
+        .height = gui->frame.height - 2 * FRAME_THICKNESS - 2 * PAD,
+    };
+
+    gui->bg = gui->rect;
 }
 
 bool Gui_init(Gui * gui)
@@ -76,7 +110,7 @@ bool Gui_init(Gui * gui)
     SetTargetFPS(TFPS);
 
     if (! _Tx_init(gui)) return false;
-    _Grid_init(gui);
+    _Gui_elem_init(gui);
     
     return true;
 }
@@ -99,16 +133,20 @@ void Gui_update(Gui * gui)
 
 void _Grid_draw(Gui * gui)
 {
+    DrawTexturePro(gui->tx.texture, gui->tx.bg, gui->bg, (Vector2){}, 0, GRAY);
+
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
         DrawTexturePro(gui->tx.texture, gui->tx.src[k], gui->grid.cells[k], (Vector2){}, 0, RAYWHITE);
     }
+
+    DrawTexturePro(gui->tx.texture, gui->tx.frame, gui->frame, (Vector2){}, 0, RAYWHITE);
 }
 
 void Gui_draw(Gui * gui)
 {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
 
     _Grid_draw(gui);
 

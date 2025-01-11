@@ -36,8 +36,6 @@ static void _try_dir(Prog * prog, char dir)
         to = sym_val(Npuzzle_at(& prog->np, from));
         Gui_grid_move(& prog->gui, to, prog->speed);
     }
-
-    // dbg_Npuzzle(& prog->np, 1);
 }
 
 static bool _Prog_queue_action(Prog * prog, char x, int speed)
@@ -84,7 +82,7 @@ static void _solve(Prog * prog)
     // printf("Solution: %s\n len: %d\n", prog->solver.buff, len);
     for (int k = 0; k < len; k ++)
     {
-        _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 2);
+        _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 3);
     }
 }
 
