@@ -1,6 +1,8 @@
 ## 15-puzzle game
 
-![Alt text](/ass/ui.jpg?raw=true "UI")
+<!-- ![Alt text](/ass/ui.jpg?raw=true "UI")
+ -->
+<img src="ass/ui.jpg" width="400" height="400">
 
 ## Controls
 Arrow keys to **move**
