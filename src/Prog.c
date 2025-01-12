@@ -88,7 +88,7 @@ static void _solve(Prog * prog)
 void Prog_input(Prog * prog)
 {
     if (WindowShouldClose()) { prog->runs = false; return ; }
-    if (Gui_grid_in_animation(& prog->gui)) return ;
+    if (! Rbuff_empty(& prog->action_buff)) return ;
 
     if      (IsKeyPressed(KEY_UP))      _Prog_queue_action(prog, 'd', NCYCLES);
     else if (IsKeyPressed(KEY_RIGHT))   _Prog_queue_action(prog, 'l', NCYCLES);
