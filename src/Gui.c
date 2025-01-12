@@ -1,5 +1,12 @@
 #include "Gui.h"
-#include "init.h"
+
+#define TX_PATH "ass/tx.png"
+#define TX_CELL_SIZE 100
+#define WW 800
+#define WH 800
+#define FRAME_THICKNESS 70
+#define TFPS 60
+#define PAD 5
 
 static float _Grid_cell_size(Grid const * grid)
 {
@@ -84,7 +91,6 @@ static bool _Tx_init(Gui * gui)
     return true;
 }
 
-#define PAD 5
 static void _Gui_elem_init(Gui * gui)
 {
     gui->frame = gui->rect;

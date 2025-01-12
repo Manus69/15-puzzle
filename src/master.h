@@ -6,12 +6,10 @@
 #include <stdio.h>
 #include "lib.h"
 
-#define NO_IDX         (-1)
 #define NP_GRID_SIZE   (4)
 #define NP_SYM_CSTR    "0123456789abcdef"
 #define NP_DIRS        "urdl"
 #define NP_NDIRS       (4)
-
 
 static inline int row_col_idx(int row, int col)
 {

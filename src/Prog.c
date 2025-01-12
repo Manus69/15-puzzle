@@ -79,7 +79,6 @@ static void _solve(Prog * prog)
         
     if (len < 0) return dbg_msg("Failed to solve");
 
-    // printf("Solution: %s\n len: %d\n", prog->solver.buff, len);
     for (int k = 0; k < len; k ++)
     {
         _Prog_queue_action(prog, prog->solver.buff[len - k - 1], NCYCLES / 3);

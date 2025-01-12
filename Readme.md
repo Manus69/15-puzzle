@@ -7,7 +7,7 @@ Arrow keys to **move**
 
 Space to **shuffle**
 
-S-key to **solve**
+S-key to **solve** by computer
 
 ## Compile and run
 `make` to compile
