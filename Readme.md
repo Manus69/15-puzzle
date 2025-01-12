@@ -12,10 +12,8 @@ S-key to **solve**
 ## Compile and run
 `make` to compile
 
-`make rel` to compile with optimizations
-
 `./_npuzzle` to run the program
 
 ## Warning
 
-The program depends on gcc and Raylib
+The program depends on Raylib for graphics
