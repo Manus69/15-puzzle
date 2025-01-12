@@ -5,7 +5,9 @@
 ## Controls
 Arrow keys to **move**
 
-Space to **shuffle**
+Space to **pause**
+
+X-key to **shuffle**
 
 S-key to **solve** by computer
 

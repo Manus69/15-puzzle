@@ -48,12 +48,9 @@ static int _Window_w(void)
     return WW;
 }
 
-static bool _Tx_init(Gui * gui)
+static void _Tx_init_tiles(Gui * gui)
 {
     int idx;
-
-    gui->tx.texture = LoadTexture(TX_PATH);
-    if (gui->tx.texture.id == 0) return false;
 
     for (int k = 1; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
@@ -71,7 +68,10 @@ static bool _Tx_init(Gui * gui)
             .height = TX_CELL_SIZE,
         };
     }
+}
 
+static void _Tx_init_frame(Gui * gui)
+{
     gui->tx.frame = (Rectangle)
     {
         .x = 400,
@@ -79,7 +79,10 @@ static bool _Tx_init(Gui * gui)
         .height = 500,
         .width = 490,
     };
+}
 
+static void _Tx_init_bg(Gui * gui)
+{
     gui->tx.bg = (Rectangle)
     {
         .x = 910,
@@ -87,6 +90,16 @@ static bool _Tx_init(Gui * gui)
         .width = 410,
         .height = 410,
     };
+}
+
+static bool _Tx_init(Gui * gui)
+{
+    gui->tx.texture = LoadTexture(TX_PATH);
+    if (gui->tx.texture.id == 0) return false;
+
+    _Tx_init_tiles(gui);    
+    _Tx_init_frame(gui);
+    _Tx_init_bg(gui);
 
     return true;
 }
@@ -139,14 +152,10 @@ void Gui_update(Gui * gui)
 
 void _Grid_draw(Gui * gui)
 {
-    DrawTexturePro(gui->tx.texture, gui->tx.bg, gui->bg, (Vector2){}, 0, GRAY);
-
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
         DrawTexturePro(gui->tx.texture, gui->tx.src[k], gui->grid.cells[k], (Vector2){}, 0, RAYWHITE);
     }
-
-    DrawTexturePro(gui->tx.texture, gui->tx.frame, gui->frame, (Vector2){}, 0, RAYWHITE);
 }
 
 void Gui_draw(Gui * gui)
@@ -154,7 +163,9 @@ void Gui_draw(Gui * gui)
     BeginDrawing();
     ClearBackground(BLACK);
 
+    DrawTexturePro(gui->tx.texture, gui->tx.bg, gui->bg, (Vector2){}, 0, GRAY);
     _Grid_draw(gui);
+    DrawTexturePro(gui->tx.texture, gui->tx.frame, gui->frame, (Vector2){}, 0, RAYWHITE);
 
     EndDrawing();
 }
@@ -196,5 +207,4 @@ void Gui_grid_move(Gui * gui, int idx, int ncycles)
 
     * dst = * src;
 }
-
 

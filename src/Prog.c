@@ -34,7 +34,7 @@ static void _try_dir(Prog * prog, char dir)
     if (Npuzzle_move_dir_check(& prog->np, dir))
     {
         to = sym_val(Npuzzle_at(& prog->np, from));
-        Gui_grid_move(& prog->gui, to, prog->speed);
+        Gui_grid_move(& prog->gui, to, prog->anm.speed);
     }
 }
 
@@ -42,7 +42,7 @@ static bool _Prog_queue_action(Prog * prog, char x, int speed)
 {
     if (Rbuff_full(& prog->action_buff)) return false;
 
-    prog->speed = speed;
+    prog->anm.speed = speed;
     Rbuff_pushc(& prog->action_buff, x);
 
     return true;
@@ -85,22 +85,53 @@ static void _solve(Prog * prog)
     }
 }
 
-void Prog_input(Prog * prog)
+static void _pause(Prog * prog)
 {
-    if (WindowShouldClose()) { prog->runs = false; return ; }
+    prog->anm.pause = ! prog->anm.pause;
+}
+
+static void _input_reg(Prog * prog, int key)
+{
+    if (key == KEY_SPACE) return _pause(prog);
     if (! Rbuff_empty(& prog->action_buff)) return ;
 
-    if      (IsKeyPressed(KEY_UP))      _Prog_queue_action(prog, 'd', NCYCLES);
-    else if (IsKeyPressed(KEY_RIGHT))   _Prog_queue_action(prog, 'l', NCYCLES);
-    else if (IsKeyPressed(KEY_DOWN))    _Prog_queue_action(prog, 'u', NCYCLES);
-    else if (IsKeyPressed(KEY_LEFT))    _Prog_queue_action(prog, 'r', NCYCLES);
-    else if (IsKeyPressed(KEY_SPACE))   _scramble(prog, $min(SCRAMBLELN, BUFF_SIZE));
-    else if (IsKeyPressed(KEY_S))       _solve(prog);
+    if      (key == KEY_UP)      _Prog_queue_action(prog, 'd', NCYCLES);
+    else if (key == KEY_RIGHT)   _Prog_queue_action(prog, 'l', NCYCLES);
+    else if (key == KEY_DOWN)    _Prog_queue_action(prog, 'u', NCYCLES);
+    else if (key == KEY_LEFT)    _Prog_queue_action(prog, 'r', NCYCLES);
+    else if (key == KEY_X)       _scramble(prog, $min(SCRAMBLELN, BUFF_SIZE));
+    else if (key == KEY_S)       _solve(prog);
+}
+
+static void _input_paused(Prog * prog, int key)
+{
+    if      (key == KEY_SPACE)  return _pause(prog);
+    else if (key == KEY_UP || key == KEY_RIGHT || key == KEY_DOWN || key == KEY_LEFT || 
+            key == KEY_X || key == KEY_S)
+    {
+        _pause(prog);
+        Rbuff_pop_all(& prog->action_buff);
+
+        return _input_reg(prog, key);
+    }
+}
+
+void Prog_input(Prog * prog)
+{
+    int key;
+
+    if (WindowShouldClose()) { prog->runs = false; return ; }
+
+    key = GetKeyPressed();
+
+    if (prog->anm.pause) return _input_paused(prog, key);
+    else return _input_reg(prog, key);
 }
 
 void Prog_update(Prog * prog)
 {
-    _Prog_perform_action(prog);
+    if (! prog->anm.pause) _Prog_perform_action(prog);
+
     Gui_update(& prog->gui);
 }
 

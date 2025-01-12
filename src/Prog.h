@@ -7,11 +7,17 @@
 
 typedef struct
 {
+    int     speed;
+    bool    pause;
+}   Anm;
+
+typedef struct
+{
     Gui     gui;
     Npuzzle np;
     Rbuff   action_buff;
     Solver  solver;
-    int     speed;
+    Anm     anm;
     bool    runs;
 }   Prog;
 

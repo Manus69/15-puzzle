@@ -70,6 +70,11 @@ static inline char Rbuff_pop(Rbuff * rbuff)
     return * ptr;
 }
 
+static inline void Rbuff_pop_all(Rbuff * rbuff)
+{
+    rbuff->len = 0;
+}
+
 static inline void Rbuff_pushc_forced(Rbuff * rbuff, char x)
 {
     if (! Rbuff_free_capacity(rbuff)) Rbuff_pop(rbuff);
