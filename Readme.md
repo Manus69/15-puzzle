@@ -17,3 +17,8 @@ S-key to **solve** by computer
 ## Warning
 
 The program depends on Raylib for graphics
+
+## To do / bugs
+- The solver shits the bed on some inputs (the solutions are too long)
+- Drag pieces with mouse ?
+- Sounds ?
