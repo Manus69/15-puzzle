@@ -85,6 +85,26 @@ static inline void Npuzzle_init(Npuzzle * np, char const * cstr)
     }
 }
 
+static inline bool Npuzzle_adjacent(Npuzzle const * np, int idx)
+{
+    int hole;
+    int drow;
+    int dcol;
+
+    hole = Npuzzle_hole_idx(np);
+    if (hole == idx) return false;
+    
+    drow = abs(idx_row(hole) - idx_row(idx));
+    dcol = abs(idx_col(hole) - idx_col(idx));
+
+    return (drow <= 1 && dcol == 0) || (dcol <= 1 && drow == 0);
+}
+
+static inline bool Npuzzle_hole_in_dir(Npuzzle const * np, int idx, char dir)
+{
+    return Npuzzle_hole_idx(np) == idx_dir(idx, dir);
+}
+
 static inline bool Npuzzle_solved(Npuzzle const * np)
 {
     if (np->hole_idx != NP_GRID_SIZE * NP_GRID_SIZE - 1) return false;

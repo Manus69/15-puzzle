@@ -1,5 +1,7 @@
 #include "Gui.h"
 
+#include <assert.h>
+
 #define TX_PATH "ass/tx.png"
 #define TX_CELL_SIZE 100
 #define WW 800
@@ -36,6 +38,16 @@ static Rectangle _Grid_layout_rect(Grid const * grid, int idx)
 static Rectangle * _Grid_get(Grid const * grid, int idx)
 {
     return (Rectangle *) & grid->cells[idx];
+}
+
+static int _Grid_row_click(Grid const * grid, Vector2 xy)
+{
+    return (xy.y - grid->rect.y) / _Grid_cell_size(grid);
+}
+
+static int _Grid_col_click(Grid const * grid, Vector2 xy)
+{
+    return (xy.x - grid->rect.x) / _Grid_cell_size(grid);
 }
 
 static int _Window_h(void)
@@ -208,3 +220,103 @@ void Gui_grid_move(Gui * gui, int idx, int ncycles)
     * dst = * src;
 }
 
+static Vector2 _Rect_center(Rectangle rect)
+{
+    return (Vector2)
+    {
+        .x = rect.x + rect.width / 2,
+        .y = rect.y + rect.height / 2,
+    };
+}
+
+static Vector2 _Rect_corner(Rectangle rect, int dx, int dy)
+{
+    Vector2 center;
+
+    center = _Rect_center(rect);
+
+    return (Vector2)
+    {
+        .x = center.x + dx * (rect.width / 2),
+        .y = center.y + dy * (rect.height / 2),
+    };
+}
+        
+typedef struct
+{
+    Vector2 vertex[3];
+}   Tri;
+
+static Tri _Tri_rect(Rectangle rect, char dir)
+{
+    Tri tri;
+
+    static const char _dx[][2] =
+    {
+        ['r'] = {1, 1},
+        ['l'] = {-1, -1},
+        ['u'] = {-1, 1},
+        ['d'] = {-1, 1},
+        ['z'] = {},
+    };
+
+    static const char _dy[][2] =
+    {
+        ['u'] = {-1, -1},
+        ['d'] = {1, 1},
+        ['l'] = {-1, 1},
+        ['r'] = {-1, 1},
+        ['z'] = {},
+    };
+
+    tri = (Tri)
+    {
+        .vertex[0] = _Rect_center(rect),
+        .vertex[1] = _Rect_corner(rect, _dx[(int) dir][0], _dy[(int) dir][0]),
+        .vertex[2] = _Rect_corner(rect, _dx[(int) dir][1], _dy[(int) dir][1]),
+    };
+
+    return tri;
+}
+
+static char _click_pdir(Rectangle rect, Vector2 xy)
+{
+    Tri tri;
+
+    for (int k = 0; k < NP_NDIRS; k ++)
+    {
+        tri = _Tri_rect(rect, NP_DIRS[k]);
+        if (CheckCollisionPointTriangle(xy, tri.vertex[0], tri.vertex[1], tri.vertex[2])) return NP_DIRS[k];
+    }
+
+    assert(0);
+}
+
+static int _click_idx(Gui const * gui, Vector2 xy)
+{
+    int row, col;
+
+    if (! CheckCollisionPointRec(xy, gui->grid.rect)) return NO_IDX;
+
+    row = _Grid_row_click(& gui->grid, xy);
+    col = _Grid_col_click(& gui->grid, xy);
+
+    return row_col_idx(row, col);
+}
+
+GuiClck Gui_click(Gui const * gui, Vector2 xy)
+{
+    int     idx;
+    char    dir;
+
+    idx = _click_idx(gui, xy);
+    if (idx == NO_IDX) return (GuiClck) {.idx = idx};
+
+    dir = _click_pdir(_Grid_layout_rect(& gui->grid, idx), xy);
+
+    return (GuiClck)
+    {
+        .idx = idx,
+        .pdir = dir,
+    };
+}

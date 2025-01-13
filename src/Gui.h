@@ -34,13 +34,20 @@ typedef struct
     Tx          tx;
 }   Gui;
 
-bool Gui_init(Gui * gui);
-void Gui_deinit(Gui * gui);
-void Gui_update(Gui * gui);
-void Gui_draw(Gui * gui);
-bool Gui_grid_in_animation(Gui const * gui);
-void Gui_grid_set(Gui * gui, char const * cstr);
-void Gui_grid_move(Gui * gui, int idx, int ncycles);
+typedef struct
+{
+    int     idx;
+    char    pdir;
+}   GuiClck;
+
+bool    Gui_init(Gui * gui);
+void    Gui_deinit(Gui * gui);
+void    Gui_update(Gui * gui);
+void    Gui_draw(Gui * gui);
+bool    Gui_grid_in_animation(Gui const * gui);
+void    Gui_grid_set(Gui * gui, char const * cstr);
+void    Gui_grid_move(Gui * gui, int idx, int ncycles);
+GuiClck Gui_click(Gui const * gui, Vector2 xy);
 
 
 #endif

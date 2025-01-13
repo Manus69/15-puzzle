@@ -85,14 +85,14 @@ static void _solve(Prog * prog)
     }
 }
 
-static void _pause(Prog * prog)
+static void _pause_toggle(Prog * prog)
 {
     prog->anm.pause = ! prog->anm.pause;
 }
 
 static void _input_reg(Prog * prog, int key)
 {
-    if (key == KEY_SPACE) return _pause(prog);
+    if (key == KEY_SPACE) return _pause_toggle(prog);
     if (! Rbuff_empty(& prog->action_buff)) return ;
 
     if      (key == KEY_UP)      _Prog_queue_action(prog, 'd', NCYCLES);
@@ -105,15 +105,61 @@ static void _input_reg(Prog * prog, int key)
 
 static void _input_paused(Prog * prog, int key)
 {
-    if      (key == KEY_SPACE)  return _pause(prog);
+    if      (key == KEY_SPACE)  return _pause_toggle(prog);
     else if (key == KEY_UP || key == KEY_RIGHT || key == KEY_DOWN || key == KEY_LEFT || 
              key == KEY_X || key == KEY_S)
     {
-        _pause(prog);
+        _pause_toggle(prog);
         Rbuff_pop_all(& prog->action_buff);
 
         return _input_reg(prog, key);
     }
+}
+
+static bool _click_check(Prog const * prog, GuiClck const * click)
+{
+    return  Npuzzle_hole_idx(& prog->np) != click->idx && 
+            Npuzzle_hole_in_dir(& prog->np, click->idx, click->pdir);
+}
+
+static void _board_click(Prog * prog, GuiClck const * click)
+{
+    if (Rbuff_empty(& prog->action_buff))
+    {
+        if (_click_check(prog, click)) _Prog_queue_action(prog, dir_rev(click->pdir), NCYCLES);
+
+        return ;
+    }
+
+    if (prog->anm.pause)
+    {
+        if (_click_check(prog, click))
+        {
+            Rbuff_pop_all(& prog->action_buff);
+            _Prog_queue_action(prog, dir_rev(click->pdir), NCYCLES);
+            _pause_toggle(prog);
+        }
+    }
+    else
+    {
+        _pause_toggle(prog);
+    }
+}
+
+static void _input_click(Prog * prog)
+{
+    Vector2 xy;
+    GuiClck click;
+
+    xy = GetMousePosition();
+    click = Gui_click(& prog->gui, xy);
+
+    //
+    printf("%d %c\n", click.idx, click.pdir);
+
+    if (click.idx == NO_IDX) return ;
+    
+    _board_click(prog, & click);
 }
 
 void Prog_input(Prog * prog)
@@ -121,6 +167,8 @@ void Prog_input(Prog * prog)
     int key;
 
     if (WindowShouldClose()) { prog->runs = false; return ; }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return _input_click(prog);
 
     key = GetKeyPressed();
 

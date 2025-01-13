@@ -52,7 +52,7 @@ static inline int sym_target_idx(char sym)
 
 static inline int dir_drow(char dir)
 {
-    static char drow[] = 
+    static const char drow[] = 
     {
         ['u'] = -1,
         ['d'] = 1,
@@ -69,7 +69,7 @@ static inline char drow_dir(int drow)
 
 static inline int dir_dcol(char dir)
 {
-    static char dcol[] =
+    static const char dcol[] =
     {
         ['l'] = -1,
         ['r'] = 1,
@@ -108,6 +108,14 @@ static inline char dir_rev(char dir)
     return rev[(int) dir];
 }
 
+static inline int idx_dir(int idx, char dir)
+{
+    int row, col;
 
+    row = idx_row(idx) + dir_drow(dir);
+    col = idx_col(idx) + dir_dcol(dir);
+
+    return row_col_idx(row, col);
+}
 
 #endif
