@@ -107,7 +107,7 @@ static void _input_paused(Prog * prog, int key)
 {
     if      (key == KEY_SPACE)  return _pause(prog);
     else if (key == KEY_UP || key == KEY_RIGHT || key == KEY_DOWN || key == KEY_LEFT || 
-            key == KEY_X || key == KEY_S)
+             key == KEY_X || key == KEY_S)
     {
         _pause(prog);
         Rbuff_pop_all(& prog->action_buff);
