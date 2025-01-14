@@ -118,4 +118,14 @@ static inline int idx_dir(int idx, char dir)
     return row_col_idx(row, col);
 }
 
+static inline int distance(int lhs, int rhs)
+{
+    int drow, dcol;
+
+    drow = abs(idx_row(lhs) - idx_row(rhs));
+    dcol = abs(idx_col(lhs) - idx_col(rhs));
+
+    return drow + dcol;
+}
+
 #endif

@@ -1,6 +1,8 @@
 #include "Prog.h"
 #include "dbg.h"
 
+#include <assert.h>
+
 #define CSTR_DFLT   "123456789abcdef0"
 #define NCYCLES     (10)
 #define BUFF_SIZE   (RBUFF_SIZE)
@@ -71,8 +73,24 @@ static void _scramble(Prog * prog, int nmoves)
     }
 }
 
+static void _solve_dbg(Prog * prog)
+{
+    int len;
+
+    len = Solver_solve(& prog->solver, & prog->np);
+
+    assert(len >= 0);
+
+    printf("%d\n\n", len);
+
+    Npuzzle_init(& prog->np, CSTR_DFLT);
+    Gui_grid_set(& prog->gui, CSTR_DFLT);
+}
+
 static void _solve(Prog * prog)
 {
+    (void) _solve_dbg;
+
     int len;
 
     len = Solver_solve(& prog->solver, & prog->np);
@@ -140,10 +158,7 @@ static void _board_click(Prog * prog, GuiClck const * click)
             _pause_toggle(prog);
         }
     }
-    else
-    {
-        _pause_toggle(prog);
-    }
+    else _pause_toggle(prog);
 }
 
 static void _input_click(Prog * prog)

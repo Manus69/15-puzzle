@@ -199,10 +199,7 @@ void Gui_update(Gui * gui)
         gui->grid.selection.rect->y += gui->grid.selection.ds.y;
         gui->grid.selection.ncycles --;
 
-        if (gui->grid.selection.ncycles == 1)
-        {
-            gui->snd.should_play = true;
-        }
+        gui->snd.should_play = gui->grid.selection.ncycles == 1;
     }
 }
 

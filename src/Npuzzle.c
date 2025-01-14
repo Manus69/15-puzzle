@@ -43,13 +43,15 @@ int Npuzzle_measure_disorder(Npuzzle const * np)
 int Npuzzle_measure_distance(Npuzzle const * np)
 {
     int tot;
-    int ds;
+    int target;
 
     tot = 0;
     for (int k = 0; k < NP_GRID_SIZE * NP_GRID_SIZE; k ++)
     {
-        ds = abs(k - sym_target_idx(Npuzzle_at(np, k)));
-        tot += ds;
+        if (k == np->hole_idx) continue;
+        
+        target = sym_target_idx(Npuzzle_at(np, k));
+        tot += distance(k, target);
     }
 
     return tot;

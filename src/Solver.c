@@ -33,8 +33,8 @@ typedef int (* metricf)(Npuzzle const *);
 
 static inline int _cum_metric(Npuzzle const * np)
 {
-    return Npuzzle_measure_disorder(np);
-    // return Npuzzle_measure_distance(np);
+    // return Npuzzle_measure_disorder(np);
+    return Npuzzle_measure_distance(np);
 }
 
 static Pos _Solver_pos(Solver const * solver, int id)
@@ -107,15 +107,12 @@ static int _Solver_backtrack(Solver * solver)
 
     while (true)
     {
-        if (len >= SOLVER_BS) return NO_IDX;
-        if (pos.parent_id == NO_IDX)
-        {
-            return len;
-        }
+        if (len >= SOLVER_BS)           return NO_IDX;
+        if (pos.parent_id == NO_IDX)    return len;
 
         parent = _Solver_pos(solver, pos.parent_id);
-        dir = dir_idx_idx(Npuzzle_hole_idx(_Solver_np(solver, parent.id)), 
-                        Npuzzle_hole_idx(_Solver_np(solver, pos.id)));
+        dir = dir_idx_idx(  Npuzzle_hole_idx(_Solver_np(solver, parent.id)), 
+                            Npuzzle_hole_idx(_Solver_np(solver, pos.id)));
         
         solver->buff[len] = dir;
         len ++;
@@ -143,10 +140,7 @@ static bool _Solver_visit(Solver * solver)
     pos = _Solver_peek_top(solver);
     np = _Solver_np(solver, pos.id);
 
-    if (Npuzzle_solved(np))
-    {
-        return true;
-    }
+    if (Npuzzle_solved(np)) return true;
 
     _Solver_pop_top(solver);
 
