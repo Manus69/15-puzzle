@@ -154,9 +154,6 @@ static void _input_click(Prog * prog)
     xy = GetMousePosition();
     click = Gui_click(& prog->gui, xy);
 
-    //
-    printf("%d %c\n", click.idx, click.pdir);
-
     if (click.idx == NO_IDX) return ;
     
     _board_click(prog, & click);

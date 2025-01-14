@@ -289,7 +289,7 @@ static char _click_pdir(Rectangle rect, Vector2 xy)
         if (CheckCollisionPointTriangle(xy, tri.vertex[0], tri.vertex[1], tri.vertex[2])) return NP_DIRS[k];
     }
 
-    assert(0);
+    return NO_IDX;
 }
 
 static int _click_idx(Gui const * gui, Vector2 xy)
@@ -314,6 +314,8 @@ GuiClck Gui_click(Gui const * gui, Vector2 xy)
 
     dir = _click_pdir(_Grid_layout_rect(& gui->grid, idx), xy);
 
+    if (dir == NO_IDX) return (GuiClck) {.idx = idx};
+    
     return (GuiClck)
     {
         .idx = idx,
