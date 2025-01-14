@@ -27,12 +27,21 @@ typedef struct
 
 typedef struct
 {
+    Sound       sound;
+    int         cycles;
+    bool        should_play;
+    bool        muted;
+}   Snd;
+
+typedef struct
+{
     Rectangle   rect;
     Rectangle   frame;
     Rectangle   bg;
     Grid        grid;
     Tx          tx;
     Image       icon;
+    Snd         snd;
 }   Gui;
 
 typedef struct
@@ -48,6 +57,8 @@ void    Gui_draw(Gui * gui);
 bool    Gui_grid_in_animation(Gui const * gui);
 void    Gui_grid_set(Gui * gui, char const * cstr);
 void    Gui_grid_move(Gui * gui, int idx, int ncycles);
+void    Gui_play_sound(Gui * gui);
+void    Gui_mute_toggle(Gui * gui);
 GuiClck Gui_click(Gui const * gui, Vector2 xy);
 
 

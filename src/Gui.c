@@ -2,14 +2,18 @@
 
 #include <assert.h>
 
-#define TX_PATH "ass/tx.png"
-#define ICON_PATH "ass/icon.png"
+#define SOUND_PATH  "ass/slap.wav"
+#define TX_PATH     "ass/tx.png"
+#define ICON_PATH   "ass/icon.png"
 #define TX_CELL_SIZE 100
 #define WW 800
 #define WH 800
 #define FRAME_THICKNESS 70
 #define TFPS 60
 #define PAD 5
+#define SND_CYCLE_OFS 3
+#define SND_VOL 0.05
+#define SND_CYCLES 20
 
 static float _Grid_cell_size(Grid const * grid)
 {
@@ -138,6 +142,17 @@ static bool _Gui_init_icon(Gui * gui)
     return gui->icon.data;
 }
 
+static bool _Snd_init(Snd * snd)
+{
+    InitAudioDevice();
+    if (! IsAudioDeviceReady()) return false;
+
+    snd->sound = LoadSound(SOUND_PATH);
+    SetSoundVolume(snd->sound, SND_VOL);
+    
+    return IsSoundReady(snd->sound);
+}
+
 bool Gui_init(Gui * gui)
 {
     * gui = (Gui) {};
@@ -153,6 +168,8 @@ bool Gui_init(Gui * gui)
 
     if (! _Tx_init(gui)) return false;
     _Gui_elem_init(gui);
+
+    if (! _Snd_init(& gui->snd)) return false;
     
     return true;
 }
@@ -161,7 +178,17 @@ void Gui_deinit(Gui * gui)
 {
     UnloadTexture(gui->tx.texture);
     UnloadImage(gui->icon);
+    UnloadSound(gui->snd.sound);
+    CloseAudioDevice();
     CloseWindow();
+}
+
+void Gui_mute_toggle(Gui * gui)
+{
+    SetSoundVolume(gui->snd.sound, gui->snd.muted ? SND_VOL : 0);
+    
+    gui->snd.muted = ! gui->snd.muted;
+    gui->snd.cycles = TFPS;
 }
 
 void Gui_update(Gui * gui)
@@ -171,6 +198,26 @@ void Gui_update(Gui * gui)
         gui->grid.selection.rect->x += gui->grid.selection.ds.x;
         gui->grid.selection.rect->y += gui->grid.selection.ds.y;
         gui->grid.selection.ncycles --;
+
+        if (gui->grid.selection.ncycles == 1)
+        {
+            gui->snd.should_play = true;
+        }
+    }
+}
+
+void _draw_msg(Gui * gui)
+{
+    static const char * _msg[] =
+    {
+        "Sound ON",
+        "Sound OFF",
+    };
+
+    if (gui->snd.cycles)
+    {
+        DrawText(_msg[gui->snd.muted], PAD, PAD, 30, BLACK);
+        gui->snd.cycles --;
     }
 }
 
@@ -190,8 +237,18 @@ void Gui_draw(Gui * gui)
     DrawTexturePro(gui->tx.texture, gui->tx.bg, gui->bg, (Vector2){}, 0, GRAY);
     _Grid_draw(gui);
     DrawTexturePro(gui->tx.texture, gui->tx.frame, gui->frame, (Vector2){}, 0, RAYWHITE);
+    _draw_msg(gui);
 
     EndDrawing();
+}
+
+void Gui_play_sound(Gui * gui)
+{
+    if (gui->snd.should_play)
+    {
+        PlaySound(gui->snd.sound);
+        gui->snd.should_play = false;
+    }
 }
 
 bool Gui_grid_in_animation(Gui const * gui)

@@ -22,8 +22,8 @@ bool Prog_start(Prog * prog)
 
 void Prog_stop(Prog * prog)
 {
-    Gui_deinit(& prog->gui);
     Solver_deinit(& prog->solver);
+    Gui_deinit(& prog->gui);
 }
 
 static void _try_dir(Prog * prog, char dir)
@@ -166,7 +166,8 @@ void Prog_input(Prog * prog)
     if (WindowShouldClose()) { prog->runs = false; return ; }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return _input_click(prog);
-
+    if (IsKeyPressed(KEY_M)) return Gui_mute_toggle(& prog->gui);
+    
     key = GetKeyPressed();
 
     if (prog->anm.pause) return _input_paused(prog, key);
@@ -183,6 +184,7 @@ void Prog_update(Prog * prog)
 void Prog_display(Prog * prog)
 {
     Gui_draw(& prog->gui);
+    Gui_play_sound(& prog->gui);
 }
 
 int Prog_error(Prog * prog, char const * msg)

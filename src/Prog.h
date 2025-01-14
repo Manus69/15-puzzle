@@ -14,6 +14,7 @@ typedef struct
 typedef struct
 {
     Gui     gui;
+    Snd     snd;
     Npuzzle np;
     Rbuff   action_buff;
     Solver  solver;
