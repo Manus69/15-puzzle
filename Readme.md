@@ -13,6 +13,9 @@ X-key to **shuffle**
 
 S-key to **solve** by computer
 
+(New) Mouse input:
+**Moving** is also possible by clicking a square in a desired direction
+
 ## Compile and run
 `make` to compile
 
@@ -24,5 +27,4 @@ The program depends on Raylib for graphics
 
 ## To do / bugs
 - The solver shits the bed on some inputs (the solutions are too long)
-- Drag pieces with mouse ?
 - Sounds ?
