@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #define TX_PATH "ass/tx.png"
+#define ICON_PATH "ass/icon.png"
 #define TX_CELL_SIZE 100
 #define WW 800
 #define WH 800
@@ -130,6 +131,13 @@ static void _Gui_elem_init(Gui * gui)
     gui->bg = gui->rect;
 }
 
+static bool _Gui_init_icon(Gui * gui)
+{
+    gui->icon = LoadImage(ICON_PATH);
+
+    return gui->icon.data;
+}
+
 bool Gui_init(Gui * gui)
 {
     * gui = (Gui) {};
@@ -140,6 +148,9 @@ bool Gui_init(Gui * gui)
     InitWindow(gui->rect.width, gui->rect.height, 0);
     SetTargetFPS(TFPS);
 
+    if (! _Gui_init_icon(gui)) return false;
+    SetWindowIcon(gui->icon);
+
     if (! _Tx_init(gui)) return false;
     _Gui_elem_init(gui);
     
@@ -149,6 +160,7 @@ bool Gui_init(Gui * gui)
 void Gui_deinit(Gui * gui)
 {
     UnloadTexture(gui->tx.texture);
+    UnloadImage(gui->icon);
     CloseWindow();
 }
 

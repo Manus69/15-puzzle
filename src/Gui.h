@@ -32,6 +32,7 @@ typedef struct
     Rectangle   bg;
     Grid        grid;
     Tx          tx;
+    Image       icon;
 }   Gui;
 
 typedef struct
